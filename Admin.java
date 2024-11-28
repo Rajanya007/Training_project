@@ -41,6 +41,79 @@ public class Admin {
         }
     }
 
+    private static void addPayslipData(Scanner sc) {
+        try {
+            System.out.print("\033[1;33m>>\033[0m Enter Employee ID: ");
+            int employeeId = sc.nextInt();
+
+            // Check if the employee exists and fetch the basic salary
+            String checkEmployeeQuery = "SELECT emp_name, emp_salary FROM employee WHERE emp_id = ?";
+            PreparedStatement checkStmt = connection.prepareStatement(checkEmployeeQuery);
+            checkStmt.setInt(1, employeeId);
+            ResultSet rs = checkStmt.executeQuery();
+
+            if (rs.next()) {
+                String employeeName = rs.getString("emp_name");
+                double basicSalary = rs.getDouble("emp_salary"); // Fetch the basic salary from the employee table
+                System.out.println("\033[1;32m[Info]\033[0m Employee Found: " + employeeName);
+                System.out.println("\033[1;34m[Info]\033[0m Basic Salary: $" + basicSalary);
+
+                // Gather additional payslip details from the admin
+                System.out.print("\033[1;33m>>\033[0m Enter Month (e.g., 'November 2024'): ");
+                sc.nextLine(); // Consume leftover newline
+                String month = sc.nextLine();
+
+                System.out.print("\033[1;33m>>\033[0m Enter Allowances: ");
+                double allowances = sc.nextDouble();
+
+                System.out.print("\033[1;33m>>\033[0m Enter Deductions: ");
+                double deductions = sc.nextDouble();
+
+                double netSalary = basicSalary + allowances - deductions;
+                System.out.println("\033[1;34m[Info]\033[0m Calculated Net Salary: $" + netSalary);
+
+                System.out.print("\033[1;33m>>\033[0m Enter Issue Date (YYYY-MM-DD): ");
+                sc.nextLine(); // Consume leftover newline
+                String issueDate = sc.nextLine();
+
+                // Insert payslip data into the database
+                String insertPayslipQuery = "INSERT INTO payslips ( employee_id, employee_name, month, basic_salary, allowances, deductions, net_salary, issue_date) "
+                        +
+                        "VALUES ( ?, ?, ?, ?, ?, ?, ?, ?)";
+                PreparedStatement insertStmt = connection.prepareStatement(insertPayslipQuery);
+                insertStmt.setInt(1, employeeId);
+                insertStmt.setString(2, employeeName);
+                insertStmt.setString(3, month);
+                insertStmt.setDouble(4, basicSalary);
+                insertStmt.setDouble(5, allowances);
+                insertStmt.setDouble(6, deductions);
+                insertStmt.setDouble(7, netSalary);
+                insertStmt.setDate(8, java.sql.Date.valueOf(issueDate));
+
+                int rowsAffected = insertStmt.executeUpdate();
+
+                if (rowsAffected > 0) {
+                    System.out.println("\033[1;32m[Success]\033[0m Payslip added successfully!");
+                } else {
+                    System.out.println("\033[1;31m[Error]\033[0m Failed to add payslip data.");
+                }
+
+                // Close resources
+                insertStmt.close();
+            } else {
+                System.out.println("\033[1;31m[Error]\033[0m Employee ID not found.");
+            }
+
+            // Close resources
+            rs.close();
+            checkStmt.close();
+        } catch (SQLException e) {
+            System.out.println("\033[1;31m[Database Error]\033[0m " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("\033[1;31m[Unexpected Error]\033[0m " + e.getMessage());
+        }
+    }
+
     private static void registerEmployee(Scanner sc) {
         try {
             printHeader("Register New Employee");
@@ -52,6 +125,9 @@ public class Admin {
 
             System.out.print("\033[1;33m>>\033[0m Enter Email Address: ");
             String empEmail = sc.nextLine();
+
+            System.out.print("\033[1;33m>>\033[0m Generate Password for new employee: ");
+            String empPass = sc.nextLine();
 
             System.out.print("\033[1;33m>>\033[0m Enter Contact Number (10 digits): ");
             String empPhone = sc.nextLine();
@@ -105,7 +181,7 @@ public class Admin {
             }
 
             // Insert the employee details into the database
-            String insertQuery = "INSERT INTO employee (EMP_ID, EMP_NAME, EMP_EMAIL, EMP_PHONE, EMP_ADDRESS, EMP_SALARY, EMP_POSITION, EMP_DEPARTMENT, EMP_HIRE_DATE, ACTIVE_LOANS, EMP_STATUS, ADHAR_NUM, PAN_NUM) "
+            String insertQuery = "INSERT INTO employee (EMP_ID, EMP_NAME, EMP_EMAIL, EMP_PHONE, EMP_ADDRESS, EMP_SALARY, EMP_POSITION, EMP_DEPARTMENT, EMP_HIRE_DATE, ACTIVE_LOANS, EMP_STATUS, ADHAR_NUM, PAN_NUM,EMP_PASS) "
                     +
                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             PreparedStatement pstmt = connection.prepareStatement(insertQuery);
@@ -122,6 +198,7 @@ public class Admin {
             pstmt.setString(11, empStatus);
             pstmt.setString(12, aadharNum);
             pstmt.setString(13, panNum);
+            pstmt.setString(14, empPass);
 
             int rowsAffected = pstmt.executeUpdate();
 
@@ -252,7 +329,8 @@ public class Admin {
             System.out.println("\033[1;34m8.\033[0m Clear Pending Tickets");
             // System.out.println("\033[1;34m9.\033[0m View Payslip");
             System.out.println("\033[1;34m9.\033[0m Register Employee");
-            System.out.println("\033[1;34m10.\033[0m Logout");
+            System.out.println("\033[1;34m10.\033[0m Add Employee Payslip");
+            System.out.println("\033[1;34m11.\033[0m Logout");
 
             System.out.print("\n\033[1;33m>>\033[0m Enter your choice: ");
 
@@ -270,7 +348,9 @@ public class Admin {
 
                 case "8" -> clearPendingTickets(scanner);
                 case "9" -> registerEmployee(scanner);
-                case "10" -> logout = true;
+                case "10" -> addPayslipData(scanner);
+                case "11" -> logout = true;
+
                 default -> System.out.println("Invalid option. Try again.");
             }
 

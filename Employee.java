@@ -14,26 +14,61 @@ public class Employee {
         connection = conn;
     }
 
+    // public static void login(Scanner scanner) {
+    // try {
+    // System.out.print("Enter Employee Id: ");
+    // String accountNumber = scanner.next();
+    // System.out.print("Enter Password: ");
+    // String pin = scanner.next();
+
+    // String query = "SELECT * FROM admin_table WHERE admin_name = '" +
+    // accountNumber
+    // + "' AND admin_password = '" + pin + "'";
+    // PreparedStatement pstmt = connection.prepareStatement(query);
+    // ResultSet rs = pstmt.executeQuery();
+    // boolean resBool = rs.next();
+
+    // if (resBool) {
+    // String customerName = rs.getString("admin_name");
+    // System.out.println("Login Successful. Welcome, " + customerName);
+    // showAccountMenu(accountNumber);
+    // } else {
+    // System.out.println("Invalid Account Number or PIN");
+    // }
+    // } catch (SQLException e) {
+    // System.out.println("Error: " + e.getMessage());
+    // }
+    // }
+
     public static void login(Scanner scanner) {
         try {
-            System.out.print("Enter Employee Id: ");
-            String accountNumber = scanner.next();
+            System.out.print("Enter Employee ID: ");
+            String employeeId = scanner.next();
             System.out.print("Enter Password: ");
-            String pin = scanner.next();
+            String password = scanner.next();
 
-            String query = "SELECT * FROM admin_table WHERE admin_name = '" + accountNumber
-                    + "' AND admin_password = '" + pin + "'";
+            // Query to verify login details from the employee table
+            String query = "SELECT * FROM employee WHERE emp_id = ? AND emp_pass= ?";
             PreparedStatement pstmt = connection.prepareStatement(query);
-            ResultSet rs = pstmt.executeQuery();
-            boolean resBool = rs.next();
+            pstmt.setString(1, employeeId);
+            pstmt.setString(2, password); // Assuming `emp_status` column stores the password
 
-            if (resBool) {
-                String customerName = rs.getString("admin_name");
-                System.out.println("Login Successful. Welcome, " + customerName);
-                showAccountMenu(accountNumber);
+            ResultSet rs = pstmt.executeQuery();
+
+            // Check if the credentials match
+            if (rs.next()) {
+                String employeeName = rs.getString("emp_name");
+                System.out.println("Login Successful. Welcome, " + employeeName);
+
+                // Call a function to display the employee menu or relevant operations
+                showAccountMenu(employeeId);
             } else {
-                System.out.println("Invalid Account Number or PIN");
+                System.out.println("Invalid Employee ID or Password.");
             }
+
+            // Close resources
+            rs.close();
+            pstmt.close();
         } catch (SQLException e) {
             System.out.println("Error: " + e.getMessage());
         }
@@ -75,7 +110,7 @@ public class Employee {
                 case "6" -> transferFunds(scanner);
                 case "7" -> viewTransactionHistory(scanner);
                 case "8" -> clearPendingTickets(scanner);
-                case "9" -> viewPayslip(scanner);
+                case "9" -> viewPayslip(accountNumber, scanner);
                 case "10" -> logout = true;
                 default -> System.out.println("Invalid option. Try again.");
             }
@@ -83,12 +118,12 @@ public class Employee {
         }
     }
 
-    private static void viewPayslip(Scanner scanner) {
+    private static void viewPayslip(String employeeId, Scanner scanner) {
         // Scanner scanner = new Scanner(System.in);
 
         try {
-            System.out.print("Enter Employee ID: ");
-            int employeeId = scanner.nextInt();
+            // System.out.print("Enter Employee ID: ");
+            // int employeeId = scanner.nextInt();
             scanner.nextLine(); // Consume newline
 
             System.out.print("Enter Payslip Month (e.g., 'October 2024'): ");
@@ -96,7 +131,7 @@ public class Employee {
 
             String query = "SELECT * FROM payslips WHERE employee_id = ? AND month = ?";
             PreparedStatement statement = connection.prepareStatement(query);
-            statement.setInt(1, employeeId);
+            statement.setString(1, employeeId);
             statement.setString(2, month);
 
             ResultSet resultSet = statement.executeQuery();

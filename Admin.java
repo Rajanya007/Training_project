@@ -80,8 +80,7 @@ public class Admin {
 
                 // Insert payslip data into the database
                 String insertPayslipQuery = "INSERT INTO payslips ( employee_id, employee_name, month, basic_salary, allowances, deductions, net_salary, issue_date) "
-                        +
-                        "VALUES ( ?, ?, ?, ?, ?, ?, ?, ?)";
+                        + "VALUES ( ?, ?, ?, ?, ?, ?, ?, ?)";
                 PreparedStatement insertStmt = connection.prepareStatement(insertPayslipQuery);
                 insertStmt.setInt(1, employeeId);
                 insertStmt.setString(2, employeeName);
@@ -184,8 +183,7 @@ public class Admin {
 
             // Insert the employee details into the database
             String insertQuery = "INSERT INTO employee (EMP_ID, EMP_NAME, EMP_EMAIL, EMP_PHONE, EMP_ADDRESS, EMP_SALARY, EMP_POSITION, EMP_DEPARTMENT, EMP_HIRE_DATE, ACTIVE_LOANS, EMP_STATUS, ADHAR_NUM, PAN_NUM,EMP_PASS) "
-                    +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             PreparedStatement pstmt = connection.prepareStatement(insertQuery);
             pstmt.setInt(1, empId);
             pstmt.setString(2, empName);
@@ -355,12 +353,19 @@ public class Admin {
                 case "7" ->
                     viewTransactionHistory(scanner);
 
-                case "8" -> clearPendingTickets(scanner);
-                case "9" -> registerEmployee(scanner);
-                case "10" -> addPayslipData(scanner);
-                case "11" -> logout = true;
+                case "8" ->
+                    clearPendingTickets(scanner);
+                case "9" ->
+                    registerEmployee(scanner);
+                case "10" ->
+                    addPayslipData(scanner);
+                case "11" -> {
+                    logout = true;
+                    System.out.println("\u001B[32m\nLogging out. Goodbye!\u001B[0m");
+                }
 
-                default -> System.out.println("Invalid option. Try again.");
+                default ->
+                    System.out.println("\n\033[1;31mInvalid option. Try again.\033[0m");
             }
 
         }

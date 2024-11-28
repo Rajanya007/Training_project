@@ -1,3 +1,4 @@
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,8 +9,9 @@ import java.util.Scanner;
 // admin side ka kaam pending aa thoda
 // jo deposit withdraw mai username id ka field int dia tha wo v fix krna thoda
 public class Employee {
+
     private static Connection connection = null;
-    
+
     public Employee(Connection conn) {
         connection = conn;
     }
@@ -20,14 +22,12 @@ public class Employee {
     // String accountNumber = scanner.next();
     // System.out.print("Enter Password: ");
     // String pin = scanner.next();
-
     // String query = "SELECT * FROM admin_table WHERE admin_name = '" +
     // accountNumber
     // + "' AND admin_password = '" + pin + "'";
     // PreparedStatement pstmt = connection.prepareStatement(query);
     // ResultSet rs = pstmt.executeQuery();
     // boolean resBool = rs.next();
-
     // if (resBool) {
     // String customerName = rs.getString("admin_name");
     // System.out.println("Login Successful. Welcome, " + customerName);
@@ -39,12 +39,12 @@ public class Employee {
     // System.out.println("Error: " + e.getMessage());
     // }
     // }
-
     public static void login(Scanner scanner) {
         try {
-            System.out.print("Enter Employee ID: ");
+            System.out.println("\n\033[1;34m--- Employee Login ---\033[0m");
+            System.out.print("\033[1;33mEnter Employee ID: \033[0m");
             String employeeId = scanner.next();
-            System.out.print("Enter Password: ");
+            System.out.print("\033[1;33mEnter Password: \033[0m");
             String password = scanner.next();
 
             // Query to verify login details from the employee table
@@ -58,31 +58,32 @@ public class Employee {
             // Check if the credentials match
             if (rs.next()) {
                 String employeeName = rs.getString("emp_name");
-                System.out.println("Login Successful. Welcome, " + employeeName);
+                System.out.println("\n\033[1;32mLogin Successful.\033[0m \033[1;36mWelcome, " + employeeName + "!\033[0m\n");
 
                 // Call a function to display the employee menu or relevant operations
                 showAccountMenu(employeeId);
             } else {
-                System.out.println("Invalid Employee ID or Password.");
+                System.out.println("\n\033[1;31mInvalid Employee ID or Password. Please try again.\033[0m");
             }
 
             // Close resources
             rs.close();
             pstmt.close();
         } catch (SQLException e) {
-            System.out.println("\u001B[31mError: " + e.getMessage() + "\u001B[0m");
+            System.out.println("\n\033[1;31mError: " + e.getMessage() + "\033[0m");
         }
     }
+
     private static void printHeader(String title) {
         System.out.println("\033[1;36m=========================================");
         System.out.println("           " + title);
         System.out.println("=========================================\033[0m");
     }
-    
+
     private static void showAccountMenu(String accountNumber) {
         Scanner scanner = new Scanner(System.in);
         boolean logout = false;
-    
+
         while (!logout) {
             System.out.println("\n\u001B[44m========================================\u001B[0m");
             System.out.println("\u001B[1m\u001B[36m|       Employee Account Menu         |\u001B[0m");
@@ -98,44 +99,62 @@ public class Employee {
             System.out.println("| \u001B[33m9. View Payslip                    \u001B[0m|");
             System.out.println("| \u001B[33m10. Logout                         \u001B[0m|");
             System.out.println("========================================");
-    
+
             System.out.print("\u001B[36m\nEnter your choice: \u001B[0m");
             String choice = scanner.next();
-    
+
             switch (choice) {
-                case "1" -> registerUser(scanner);
-                case "2" -> checkUserData(accountNumber, scanner);
-                case "3" -> loanApproval(scanner);
-                case "4" -> deposit(scanner);
-                case "5" -> withdraw(scanner);
-                case "6" -> transferFunds(scanner);
-                case "7" -> viewTransactionHistory(scanner);
-                case "8" -> clearPendingTickets(scanner);
-                case "9" -> viewPayslip(accountNumber, scanner);
-                case "10" -> logout = true;
-                default -> System.out.println("Invalid option. Try again.");
+                case "1" ->
+                    registerUser(scanner);
+                case "2" ->
+                    checkUserData(accountNumber, scanner);
+                case "3" ->
+                    loanApproval(scanner);
+                case "4" ->
+                    deposit(scanner);
+                case "5" ->
+                    withdraw(scanner);
+                case "6" ->
+                    transferFunds(scanner);
+                case "7" ->
+                    viewTransactionHistory(scanner);
+                case "8" ->
+                    clearPendingTickets(scanner);
+                case "9" ->
+                    viewPayslip(accountNumber, scanner);
+                case "10" -> {
+                    logout = true;
+                    System.out.println("\u001B[32m\nLogging out. Goodbye!\u001B[0m");
+                }
+                default ->
+                System.out.println("\n\033[1;31mInvalid option. Try again.\033[0m");
             }
         }
     }
 
     private static void viewPayslip(String employeeId, Scanner scanner) {
         // Scanner scanner = new Scanner(System.in);
-
+        final String RESET = "\u001B[0m";
+        final String CYAN = "\u001B[36m";
+        final String GREEN = "\u001B[32m";
+        final String YELLOW = "\u001B[33m";
+        final String RED = "\u001B[31m";
+        final String BOLD = "\u001B[1m";
         try {
             // System.out.print("Enter Employee ID: ");
             // int employeeId = scanner.nextInt();
             scanner.nextLine(); // Consume newline
-    
+
             System.out.print(CYAN + "Enter Payslip Month (e.g., 'October 2024'): " + RESET);
             String month = scanner.nextLine();
-    
+
             String query = "SELECT * FROM payslips WHERE employee_id = ? AND month = ?";
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setString(1, employeeId);
             statement.setString(2, month);
-    
+
             ResultSet resultSet = statement.executeQuery();
-    
+
             if (resultSet.next()) {
                 System.out.println(GREEN + "\n--- Payslip Details ---" + RESET);
                 System.out.println(BOLD + "Employee ID: " + RESET + resultSet.getInt("employee_id"));
@@ -149,15 +168,15 @@ public class Employee {
             } else {
                 System.out.println(RED + "No payslip found for the given Employee ID and Month." + RESET);
             }
-    
+
             resultSet.close();
             statement.close();
-    
+
         } catch (SQLException e) {
             System.out.println(RED + "Error retrieving payslip: " + e.getMessage() + RESET);
         }
     }
-    
+
     private static void registerUser(Scanner sc) {
         try {
             printHeader("Register New User");
@@ -213,9 +232,9 @@ public class Employee {
             }
 
             // Insert the user details into the database
-            String insertQuery = "INSERT INTO users (USER_ACCNUM, USER_NAME, USER_BAL, USER_RAISEDTICK, " +
-                    "USER_ADDRESS, USER_PHONE, ADHAR_NUM, PAN_NUM, USER_PASS) " +
-                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            String insertQuery = "INSERT INTO users (USER_ACCNUM, USER_NAME, USER_BAL, USER_RAISEDTICK, "
+                    + "USER_ADDRESS, USER_PHONE, ADHAR_NUM, PAN_NUM, USER_PASS) "
+                    + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
             PreparedStatement pstmt = connection.prepareStatement(insertQuery);
             pstmt.setLong(1, userAccNum);
             pstmt.setString(2, userName);
@@ -249,24 +268,24 @@ public class Employee {
             String fetchQuery = "SELECT * FROM loan WHERE loanstatus = 'PENDING'";
             PreparedStatement fetchStmt = connection.prepareStatement(fetchQuery);
             ResultSet rs = fetchStmt.executeQuery();
-    
+
             // Header in green
-            System.out.println("\u001B[32m\n--- Pending Loan Requests ---\u001B[0m");  
+            System.out.println("\u001B[32m\n--- Pending Loan Requests ---\u001B[0m");
             System.out.println("\u001B[32m============================\u001B[0m");  // Separator line
-    
+
             List<Integer> loanList = new ArrayList<>();
             boolean hasPendingLoans = false;
-    
+
             while (rs.next()) {
                 hasPendingLoans = true;
                 int loanId = rs.getInt("loanId");
                 String loanDescription = rs.getString("loanDescription");
                 loanList.add(loanId);
-    
+
                 // Display Loan ID and Description with bold formatting
                 System.out.println("\u001B[1mLoan ID: \u001B[0m" + loanId + " \u001B[1m| Description: \u001B[0m" + loanDescription);
             }
-    
+
             if (!hasPendingLoans) {
                 System.out.println("\u001B[31mNo pending loan found.\u001B[0m");  // Red message for no pending loans
             } else {
@@ -274,7 +293,7 @@ public class Employee {
                 System.out.print("\u001B[36m\nEnter the loan ID(s) to clear (comma-separated, or type 'all' to clear all): \u001B[0m");
                 sc.nextLine(); // Clear scanner buffer
                 String input = sc.nextLine();
-    
+
                 List<Integer> loansToClear = new ArrayList<>();
                 if (input.equalsIgnoreCase("all")) {
                     loansToClear.addAll(loanList);
@@ -294,12 +313,12 @@ public class Employee {
                         }
                     }
                 }
-    
+
                 // Clear the selected loan(s)
                 for (int loanId : loansToClear) {
                     String clearQuery = "UPDATE loan SET loanstatus='VERIFIED' WHERE loanid=" + loanId;
                     PreparedStatement clearStmt = connection.prepareStatement(clearQuery);
-    
+
                     int rowsAffected = clearStmt.executeUpdate();
                     if (rowsAffected > 0) {
                         // Green message for success
@@ -311,32 +330,32 @@ public class Employee {
                     clearStmt.close();
                 }
             }
-    
+
             rs.close();
             fetchStmt.close();
         } catch (SQLException e) {
             System.out.println("\u001B[31mError: " + e.getMessage() + "\u001B[0m");
         }
     }
-    
+
     private static void checkUserData(String accountNumber, Scanner sc) {
         try {
             // Asking for the user's account number in a formatted and colored way
             System.out.print("\u001B[36mEnter Account Number of the User: \u001B[0m");
             int userAcc = sc.nextInt();
-    
+
             // Prepare the query to fetch user data
             String query = "SELECT * FROM users WHERE user_accnum = " + userAcc;
             PreparedStatement pstmt = connection.prepareStatement(query);
             ResultSet rs = pstmt.executeQuery();
-            
+
             boolean userFound = rs.next();
-    
+
             if (userFound) {
                 // Header in green to display required user details
-                System.out.println("\n\u001B[32m--- User Details ---\u001B[0m"); 
+                System.out.println("\n\u001B[32m--- User Details ---\u001B[0m");
                 System.out.println("\u001B[32m====================\u001B[0m");  // Separator line
-    
+
                 // Extract user data from the result set
                 String userAccNum = rs.getString("user_accNum");
                 String username = rs.getString("user_name");
@@ -346,7 +365,7 @@ public class Employee {
                 Integer phone = rs.getInt("user_phone");
                 Integer adhar_num = rs.getInt("adhar_num");
                 Integer pan_num = rs.getInt("pan_num");
-    
+
                 // Display the user's details with bold labels
                 System.out.println("\u001B[1mUser Account Number:\u001B[0m " + userAccNum);
                 System.out.println("\u001B[1mUser Name:\u001B[0m " + username);
@@ -363,30 +382,30 @@ public class Employee {
             System.out.println("\u001B[31mError: " + e.getMessage() + "\u001B[0m");
         }
     }
-    
+
     private static void viewTransactionHistory(Scanner sc) {
         try {
             // Prompt the admin to enter the user ID for transaction history
             System.out.print("\u001B[36mEnter the User ID to view transaction history: \u001B[0m");
             int userId = sc.nextInt();
-    
+
             // SQL query to fetch transactions involving the specified user as sender or receiver
-            String query = "SELECT transaction_id, sender_id, receiver_id, amount, transaction_date " +
-                    "FROM transactions " +
-                    "WHERE sender_id = ? OR receiver_id = ? " +
-                    "ORDER BY transaction_date DESC";
-    
+            String query = "SELECT transaction_id, sender_id, receiver_id, amount, transaction_date "
+                    + "FROM transactions "
+                    + "WHERE sender_id = ? OR receiver_id = ? "
+                    + "ORDER BY transaction_date DESC";
+
             PreparedStatement pstmt = connection.prepareStatement(query);
             pstmt.setInt(1, userId);
             pstmt.setInt(2, userId);
-    
+
             ResultSet rs = pstmt.executeQuery();
-    
+
             System.out.println("\n\u001B[32m--- Transaction History ---\u001B[0m"); // Green header
             System.out.println("\u001B[32m==============================\u001B[0m");  // Separator line
-    
+
             boolean hasTransactions = false;
-    
+
             // Iterate through the results and display each transaction
             while (rs.next()) {
                 hasTransactions = true;
@@ -395,18 +414,18 @@ public class Employee {
                 int receiverId = rs.getInt("receiver_id");
                 double amount = rs.getDouble("amount");
                 Timestamp transactionDate = rs.getTimestamp("transaction_date");
-    
+
                 // Display transaction details with formatting
-                System.out.printf("\u001B[1mTransaction ID:\u001B[0m %d | \u001B[1mSender ID:\u001B[0m %d | " +
-                        "\u001B[1mReceiver ID:\u001B[0m %d | \u001B[1mAmount:\u001B[0m %.2f | \u001B[1mDate:\u001B[0m %s%n",
+                System.out.printf("\u001B[1mTransaction ID:\u001B[0m %d | \u001B[1mSender ID:\u001B[0m %d | "
+                        + "\u001B[1mReceiver ID:\u001B[0m %d | \u001B[1mAmount:\u001B[0m %.2f | \u001B[1mDate:\u001B[0m %s%n",
                         transactionId, senderId, receiverId, amount, transactionDate);
             }
-    
+
             if (!hasTransactions) {
                 // If no transactions are found, display a message in red
                 System.out.println("\u001B[31mNo transactions found for User ID: " + userId + "\u001B[0m");
             }
-    
+
             // Close resources
             rs.close();
             pstmt.close();
@@ -415,13 +434,13 @@ public class Employee {
             System.out.println("\u001B[31mError fetching transaction history: " + e.getMessage() + "\u001B[0m");
         }
     }
-    
+
     private static void clearPendingTickets(Scanner sc) {
         try {
             String fetchQuery = "SELECT ticket_id, ticket_description FROM tickets WHERE ticket_status = 'Pending'";
             PreparedStatement fetchStmt = connection.prepareStatement(fetchQuery);
             ResultSet rs = fetchStmt.executeQuery();
-    
+
             System.out.println("\n\u001B[32m--- Pending Tickets ---\u001B[0m");
             List<Integer> ticketIds = new ArrayList<>();
             while (rs.next()) {
@@ -430,14 +449,14 @@ public class Employee {
                 ticketIds.add(ticketId);
                 System.out.println("\u001B[1mTicket ID:\u001B[0m " + ticketId + " | \u001B[1mDescription:\u001B[0m " + ticketDescription);
             }
-    
+
             if (ticketIds.isEmpty()) {
                 System.out.println("\u001B[31mNo pending tickets found.\u001B[0m");
             } else {
                 System.out.print("\u001B[36m\nEnter the Ticket ID(s) to clear (comma-separated, or type 'all' to clear all): \u001B[0m");
-                sc.nextLine(); 
+                sc.nextLine();
                 String input = sc.nextLine();
-    
+
                 List<Integer> ticketsToClear = new ArrayList<>();
                 if (input.equalsIgnoreCase("all")) {
                     ticketsToClear.addAll(ticketIds);
@@ -456,12 +475,12 @@ public class Employee {
                         }
                     }
                 }
-    
+
                 for (int ticketId : ticketsToClear) {
                     String clearQuery = "UPDATE tickets SET ticket_status = 'Resolved' WHERE ticket_id = ?";
                     PreparedStatement clearStmt = connection.prepareStatement(clearQuery);
                     clearStmt.setInt(1, ticketId);
-    
+
                     int rowsAffected = clearStmt.executeUpdate();
                     if (rowsAffected > 0) {
                         System.out.println("\u001B[32mTicket ID " + ticketId + " has been cleared.\u001B[0m");
@@ -471,51 +490,51 @@ public class Employee {
                     clearStmt.close();
                 }
             }
-    
+
             rs.close();
             fetchStmt.close();
         } catch (SQLException e) {
             System.out.println("\u001B[31mError: " + e.getMessage() + ". Please contact support.\u001B[0m");
         }
     }
-    
+
     private static void deposit(Scanner scanner) {
         try {
             System.out.print("\u001B[36mEnter Account Number of the User: \u001B[0m");
             int userAcc = scanner.nextInt();
-            
+
             String checkquery = "SELECT * FROM users where user_accnum=?";
             PreparedStatement checkingPreparedStatement = connection.prepareStatement(checkquery);
             checkingPreparedStatement.setInt(1, userAcc);
-    
+
             int testrows = checkingPreparedStatement.executeUpdate();
             if (testrows > 0) {
                 System.out.print("\u001B[36mEnter deposit amount: \u001B[0m");
                 double amount = scanner.nextDouble();
-    
+
                 String updateQuery = "UPDATE users SET user_bal = user_bal + ? WHERE user_accnum = ?";
                 PreparedStatement updateStmt = connection.prepareStatement(updateQuery);
                 updateStmt.setDouble(1, amount);
                 updateStmt.setInt(2, userAcc);
                 updateStmt.executeUpdate();
-    
+
                 String insertTransactionQuery = "INSERT INTO transactions (sender_id, receiver_id, amount, trans_type) VALUES (?,?,?, 'DEPOSIT')";
                 PreparedStatement transactionStmt = connection.prepareStatement(insertTransactionQuery);
                 transactionStmt.setInt(1, userAcc);
                 transactionStmt.setInt(2, userAcc);
                 transactionStmt.setDouble(3, amount);
                 transactionStmt.executeUpdate();
-    
+
                 System.out.println("\u001B[32m\nDeposit successful!\u001B[0m");
             } else {
                 System.out.println("\u001B[31m\nAccount Number does not exist.\u001B[0m");
             }
-    
+
         } catch (SQLException e) {
             System.out.println("\u001B[31mError: " + e.getMessage() + " \u001B[0mPlease try again.");
         }
     }
-    
+
     private static void withdraw(Scanner scanner) {
         try {
             System.out.print("\033[1;33m>>\033[0m Enter Account Number of the User: ");
@@ -575,12 +594,12 @@ public class Employee {
             String checkquery = "SELECT * FROM users where user_accnum=?";
             PreparedStatement checkingPreparedStatement = connection.prepareStatement(checkquery);
             checkingPreparedStatement.setInt(1, userAcc);
-    
+
             int testrows = checkingPreparedStatement.executeUpdate();
             if (testrows > 0) {
                 System.out.print("\u001B[36mEnter destination account number: \u001B[0m");
                 String destinationAccount = scanner.next();
-    
+
                 String checkDestinationQuery = "SELECT * FROM users WHERE user_accnum = ?";
                 PreparedStatement checkDestStmt = connection.prepareStatement(checkDestinationQuery);
                 checkDestStmt.setString(1, destinationAccount);
@@ -594,7 +613,7 @@ public class Employee {
                 double amount = scanner.nextDouble();
                 System.out.print("\u001B[36mEnter your password: \u001B[0m");
                 String pass = scanner.next();
-    
+
                 String checkBalanceQuery = "SELECT * FROM users WHERE user_accnum = ? and user_pass= ?";
                 PreparedStatement checkStmt = connection.prepareStatement(checkBalanceQuery);
                 checkStmt.setInt(1, userAcc);
@@ -605,26 +624,26 @@ public class Employee {
                     double currentBalance = rs.getDouble("user_bal");
                     if (currentBalance >= amount) {
                         connection.setAutoCommit(false);
-    
+
                         String deductQuery = "UPDATE users SET user_bal = user_bal - ? WHERE user_accnum = ?";
                         PreparedStatement deductStmt = connection.prepareStatement(deductQuery);
                         deductStmt.setDouble(1, amount);
                         deductStmt.setInt(2, userAcc);
                         deductStmt.executeUpdate();
-    
+
                         String creditQuery = "UPDATE users SET user_bal = user_bal + ? WHERE user_accnum = ?";
                         PreparedStatement creditStmt = connection.prepareStatement(creditQuery);
                         creditStmt.setDouble(1, amount);
                         creditStmt.setString(2, destinationAccount);
                         creditStmt.executeUpdate();
-    
+
                         String insertTransactionQuery = "INSERT INTO transactions (sender_id, receiver_id, amount, trans_type) VALUES (?,?,?, 'TRANSFER')";
                         PreparedStatement transactionStmt = connection.prepareStatement(insertTransactionQuery);
                         transactionStmt.setInt(1, userAcc);
                         transactionStmt.setString(2, destinationAccount);
                         transactionStmt.setDouble(3, amount);
                         transactionStmt.executeUpdate();
-    
+
                         connection.commit();
                         System.out.println("\u001B[32m\nTransfer successful!\u001B[0m");
                     } else {
@@ -633,12 +652,12 @@ public class Employee {
                 } else {
                     System.out.println("\u001B[31m\nInvalid Password!\u001B[0m");
                 }
-    
+
                 connection.setAutoCommit(true);
             } else {
                 System.out.println("\u001B[31m\nSource Account Number does not exist.\u001B[0m");
             }
-    
+
             connection.setAutoCommit(true);
         } catch (SQLException e) {
             try {
@@ -649,5 +668,5 @@ public class Employee {
             System.out.println("\u001B[31mError: " + e.getMessage() + "\u001B[0mPlease try again.");
         }
     }
-    
+
 }

@@ -1,6 +1,8 @@
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 public class Admin {
@@ -39,88 +41,107 @@ public class Admin {
         }
     }
 
-    // private static void registerUser(Scanner sc) {
-    // try {
-    // System.out.println("\n--- Register New User ---");
+    private static void registerEmployee(Scanner sc) {
+        try {
+            printHeader("Register New Employee");
 
-    // // Prompt for user details
-    // System.out.print("Enter Full Name: ");
-    // sc.nextLine(); // Consume leftover newline
-    // String userName = sc.nextLine();
+            // Prompt for employee details
+            System.out.print("\033[1;33m>>\033[0m Enter Full Name: ");
+            sc.nextLine(); // Consume leftover newline
+            String empName = sc.nextLine();
 
-    // System.out.print("Enter Address: ");
-    // String userAddress = sc.nextLine();
+            System.out.print("\033[1;33m>>\033[0m Enter Email Address: ");
+            String empEmail = sc.nextLine();
 
-    // System.out.print("Enter Contact Number: ");
-    // String userPhone = sc.nextLine();
+            System.out.print("\033[1;33m>>\033[0m Enter Contact Number (10 digits): ");
+            String empPhone = sc.nextLine();
+            while (!empPhone.matches("\\d{10}")) {
+                System.out.print("\033[1;31m[Error]\033[0m Invalid number. Re-enter Contact Number: ");
+                empPhone = sc.nextLine();
+            }
 
-    // System.out.print("Enter Aadhaar Number: ");
-    // String aadharNum = sc.nextLine();
+            System.out.print("\033[1;33m>>\033[0m Enter Address: ");
+            String empAddress = sc.nextLine();
 
-    // System.out.print("Enter PAN Number: ");
-    // String panNum = sc.nextLine();
+            System.out.print("\033[1;33m>>\033[0m Enter Salary: ");
+            double empSalary = sc.nextDouble();
+            sc.nextLine(); // Consume leftover newline
 
-    // System.out.print("Create Password: ");
-    // String userPass = sc.nextLine();
+            System.out.print("\033[1;33m>>\033[0m Enter Position: ");
+            String empPosition = sc.nextLine();
 
-    // System.out.print("Enter Initial Deposit Amount: ");
-    // double userBal = sc.nextDouble();
+            System.out.print("\033[1;33m>>\033[0m Enter Department: ");
+            String empDepartment = sc.nextLine();
 
-    // // Validate initial deposit
-    // if (userBal < 500) {
-    // System.out.println("Error: Minimum deposit amount is ₹500.");
-    // return;
-    // }
+            System.out.print("\033[1;33m>>\033[0m Enter Hire Date (YYYY-MM-DD): ");
+            String empHireDate = sc.nextLine();
+            while (!empHireDate.matches("\\d{4}-\\d{2}-\\d{2}")) {
+                System.out.print("\033[1;31m[Error]\033[0m Invalid date format. Re-enter Hire Date: ");
+                empHireDate = sc.nextLine();
+            }
 
-    // // Fetch the current maximum account number from the database
-    // String getMaxAccNumQuery = "SELECT MAX(USER_ACCNUM) AS MAX_ACCNUM FROM
-    // users";
-    // PreparedStatement maxAccNumStmt =
-    // connection.prepareStatement(getMaxAccNumQuery);
-    // ResultSet rs = maxAccNumStmt.executeQuery();
+            System.out.print("\033[1;33m>>\033[0m Enter Aadhaar Number (12 digits): ");
+            String aadharNum = sc.nextLine();
+            while (!aadharNum.matches("\\d{12}")) {
+                System.out.print("\033[1;31m[Error]\033[0m Invalid Aadhaar. Re-enter Aadhaar Number: ");
+                aadharNum = sc.nextLine();
+            }
 
-    // long startingPoint = 5548554; // Starting account number
-    // long userAccNum = startingPoint; // Default to starting point if no users
-    // exist
+            System.out.print("\033[1;33m>>\033[0m Enter PAN Number: ");
+            String panNum = sc.nextLine();
 
-    // if (rs.next()) {
-    // long maxAccNum = rs.getLong("MAX_ACCNUM");
-    // userAccNum = Math.max(maxAccNum + 1, startingPoint); // Ensure it starts from
-    // the defined starting point
-    // }
+            System.out.print("\033[1;33m>>\033[0m Enter Status (Active/Inactive): ");
+            String empStatus = sc.nextLine();
 
-    // // Insert the user details into the database
-    // String insertQuery = "INSERT INTO users (USER_ACCNUM, USER_NAME, USER_BAL,
-    // USER_RAISEDTICK, " +
-    // "USER_ADDRESS, USER_PHONE, ADHAR_NUM, PAN_NUM, USER_PASS) " +
-    // "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            // Fetch the current maximum employee ID from the database
+            String getMaxEmpIdQuery = "SELECT MAX(EMP_ID) AS MAX_EMP_ID FROM employee";
+            PreparedStatement maxEmpIdStmt = connection.prepareStatement(getMaxEmpIdQuery);
+            ResultSet rs = maxEmpIdStmt.executeQuery();
 
-    // PreparedStatement pstmt = connection.prepareStatement(insertQuery);
-    // pstmt.setLong(1, userAccNum); // Use the calculated account number
-    // pstmt.setString(2, userName);
-    // pstmt.setDouble(3, userBal);
-    // pstmt.setInt(4, 0); // Initially no raised tickets
-    // pstmt.setString(5, userAddress);
-    // pstmt.setString(6, userPhone);
-    // pstmt.setString(7, aadharNum);
-    // pstmt.setString(8, panNum);
-    // pstmt.setString(9, userPass);
+            int empId = 1; // Starting employee ID
+            if (rs.next()) {
+                int maxEmpId = rs.getInt("MAX_EMP_ID");
+                empId = maxEmpId + 1;
+            }
 
-    // int rowsAffected = pstmt.executeUpdate();
+            // Insert the employee details into the database
+            String insertQuery = "INSERT INTO employee (EMP_ID, EMP_NAME, EMP_EMAIL, EMP_PHONE, EMP_ADDRESS, EMP_SALARY, EMP_POSITION, EMP_DEPARTMENT, EMP_HIRE_DATE, ACTIVE_LOANS, EMP_STATUS, ADHAR_NUM, PAN_NUM) "
+                    +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            PreparedStatement pstmt = connection.prepareStatement(insertQuery);
+            pstmt.setInt(1, empId);
+            pstmt.setString(2, empName);
+            pstmt.setString(3, empEmail);
+            pstmt.setString(4, empPhone);
+            pstmt.setString(5, empAddress);
+            pstmt.setDouble(6, empSalary);
+            pstmt.setString(7, empPosition);
+            pstmt.setString(8, empDepartment);
+            pstmt.setDate(9, java.sql.Date.valueOf(empHireDate));
+            pstmt.setInt(10, 0); // Initially no active loans
+            pstmt.setString(11, empStatus);
+            pstmt.setString(12, aadharNum);
+            pstmt.setString(13, panNum);
 
-    // if (rowsAffected > 0) {
-    // System.out.println("User registration successful!");
-    // System.out.println("Generated Account Number: " + userAccNum);
-    // } else {
-    // System.out.println("Error: Failed to register the user.");
-    // }
+            int rowsAffected = pstmt.executeUpdate();
 
-    // } catch (SQLException e) {
-    // System.out.println("Database Error: " + e.getMessage());
-    // } catch (Exception e) {
-    // System.out.println("Unexpected Error: " + e.getMessage());
-    // }
-    // }
+            if (rowsAffected > 0) {
+                System.out.println("\033[1;32m[Success]\033[0m Employee registration successful!");
+                System.out.println("\033[1;34m[Info]\033[0m Generated Employee ID: " + empId);
+            } else {
+                System.out.println("\033[1;31m[Error]\033[0m Failed to register the employee.");
+            }
+
+            rs.close();
+            maxEmpIdStmt.close();
+            pstmt.close();
+
+        } catch (SQLException e) {
+            System.out.println("\033[1;31m[Database Error]\033[0m " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("\033[1;31m[Unexpected Error]\033[0m " + e.getMessage());
+        }
+    }
 
     private static void registerUser(Scanner sc) {
         try {
@@ -230,7 +251,8 @@ public class Admin {
             System.out.println("\033[1;34m7.\033[0m Transaction History");
             System.out.println("\033[1;34m8.\033[0m Clear Pending Tickets");
             // System.out.println("\033[1;34m9.\033[0m View Payslip");
-            System.out.println("\033[1;34m9.\033[0m Logout");
+            System.out.println("\033[1;34m9.\033[0m Register Employee");
+            System.out.println("\033[1;34m10.\033[0m Logout");
 
             System.out.print("\n\033[1;33m>>\033[0m Enter your choice: ");
 
@@ -244,14 +266,65 @@ public class Admin {
                 case "4" -> deposit(scanner);
                 case "5" -> withdraw(scanner);
                 case "6" -> transferFunds(scanner);
-                // case "7" -> viewTransactionHistory(scanner);3
+                case "7" -> viewTransactionHistory(scanner);
 
                 case "8" -> clearPendingTickets(scanner);
-                // case "9" -> viewPayslip(scanner);
-                case "9" -> logout = true;
+                case "9" -> registerEmployee(scanner);
+                case "10" -> logout = true;
                 default -> System.out.println("Invalid option. Try again.");
             }
 
+        }
+    }
+
+    private static void viewTransactionHistory(Scanner sc) {
+        try {
+            // Prompt the admin to enter the user ID for transaction history
+            System.out.print("Enter the User ID to view transaction history: ");
+            int userId = sc.nextInt();
+
+            // SQL query to fetch transactions involving the specified user as sender or
+            // receiver
+            String query = "SELECT * " +
+                    "FROM transactions " +
+                    "WHERE sender_id = ? OR receiver_id = ? " +
+                    "ORDER BY transaction_date DESC";
+
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.setInt(1, userId);
+            pstmt.setInt(2, userId);
+
+            ResultSet rs = pstmt.executeQuery();
+
+            System.out.println("\n--- Transaction History ---");
+            boolean hasTransactions = false;
+
+            // Iterate through the results and display each transaction
+            while (rs.next()) {
+                hasTransactions = true;
+                int transactionId = rs.getInt("transaction_id");
+                int senderId = rs.getInt("sender_id");
+                int receiverId = rs.getInt("receiver_id");
+                double amount = rs.getDouble("amount");
+                String type = rs.getString("trans_type");
+                Timestamp transactionDate = rs.getTimestamp("transaction_date");
+
+                // Display transaction details
+                System.out.printf(
+                        "Transaction ID: %d | Sender ID: %d | Receiver ID: %d | Amount: %.2f | Amount: " + type
+                                + " | Date: %s%n",
+                        transactionId, senderId, receiverId, amount, transactionDate);
+            }
+
+            if (!hasTransactions) {
+                System.out.println("No transactions found for User ID: " + userId);
+            }
+
+            // Close resources
+            rs.close();
+            pstmt.close();
+        } catch (SQLException e) {
+            System.out.println("Error fetching transaction history: " + e.getMessage());
         }
     }
 
@@ -473,23 +546,38 @@ public class Admin {
     private static void approveLoan(Scanner sc) {
         try {
             // Fetch all pending loans with 'VERIFIED' status
-            String fetchQuery = "SELECT loanId, loanDescription FROM loan WHERE loanstatus = 'VERIFIED'";
+            String fetchQuery = "SELECT loanId, loanDescription, loanAmount, loanDuration, loanEmi, loanStatus, userId FROM loan WHERE loanstatus = 'VERIFIED'";
             PreparedStatement fetchStmt = connection.prepareStatement(fetchQuery);
             ResultSet rs = fetchStmt.executeQuery();
 
             System.out.println("\n\033[1;36m--- Pending Loans ---\033[0m");
             List<Integer> loanList = new ArrayList<>();
+            Map<Integer, Integer> loanUserMap = new HashMap<>(); // Map loanId to userId
+            Map<Integer, Double> loanAmountMap = new HashMap<>(); // Map loanId to loanAmount
             while (rs.next()) {
                 int loanId = rs.getInt("loanId");
                 String loanDescription = rs.getString("loanDescription");
+                int userId = rs.getInt("userId");
+                double loanAmount = rs.getDouble("loanAmount");
+
                 loanList.add(loanId);
-                System.out.println("Loan ID: " + loanId + " | Description: " + loanDescription);
+                loanUserMap.put(loanId, userId);
+                loanAmountMap.put(loanId, loanAmount);
+
+                System.out.println("\033[1;32mLoan ID:\033[0m " + rs.getInt("loanId"));
+                System.out.println("\033[1;32mDescription:\033[0m " + rs.getString("loanDescription"));
+                System.out.println("\033[1;32mAmount:\033[0m " + rs.getDouble("loanAmount"));
+                System.out.println("\033[1;32mDuration (months):\033[0m " + rs.getInt("loanDuration"));
+                System.out.println("\033[1;32mEMI:\033[0m " + rs.getDouble("loanEmi"));
+                System.out.println("\033[1;32mStatus:\033[0m " + rs.getString("loanStatus"));
+                System.out.println("\033[1;32mUser ID:\033[0m " + rs.getInt("userId"));
+
+                System.out.println("\033[1;34m----------------------------------------\033[0m");
             }
 
             if (loanList.isEmpty()) {
                 System.out.println("\033[1;33mNo pending loans found.\033[0m");
             } else {
-                // Ask user to decide which loan(s) to approve
                 System.out.print(
                         "\n\033[1;33m>>\033[0m Enter the loan ID(s) to approve (comma-separated, or type 'all' to approve all): ");
                 sc.nextLine(); // Clear scanner buffer
@@ -515,8 +603,12 @@ public class Admin {
                     }
                 }
 
-                // Approve selected loans
+                // Approve selected loans and update user balances
                 for (int loanId : loansToApprove) {
+                    int userId = loanUserMap.get(loanId);
+                    double loanAmount = loanAmountMap.get(loanId);
+
+                    // Update loan status to 'APPROVED'
                     String approveQuery = "UPDATE loan SET loanstatus = 'APPROVED' WHERE loanId = ?";
                     PreparedStatement approveStmt = connection.prepareStatement(approveQuery);
                     approveStmt.setInt(1, loanId);
@@ -524,6 +616,37 @@ public class Admin {
                     int rowsAffected = approveStmt.executeUpdate();
                     if (rowsAffected > 0) {
                         System.out.println("\033[1;32m[Success]\033[0m Loan ID " + loanId + " has been approved.");
+
+                        // Increment active loans counter for the user
+                        String updateActiveLoansQuery = "UPDATE users SET active_loans = active_loans + 1 WHERE user_accnum = ?";
+                        PreparedStatement updateActiveLoansStmt = connection.prepareStatement(updateActiveLoansQuery);
+                        updateActiveLoansStmt.setInt(1, userId);
+                        int activeLoanRows = updateActiveLoansStmt.executeUpdate();
+                        if (activeLoanRows > 0) {
+                            System.out.println(
+                                    "\033[1;32m[Success]\033[0m Active loans count updated for User ID " + userId);
+                        } else {
+                            System.out
+                                    .println("\033[1;31m[Error]\033[0m Failed to update active loans count for User ID "
+                                            + userId);
+                        }
+                        updateActiveLoansStmt.close();
+
+                        // Update user balance with the loan amount
+                        String updateUserBalanceQuery = "UPDATE users SET user_bal = user_bal + ? WHERE user_accnum = ?";
+                        PreparedStatement updateUserBalanceStmt = connection.prepareStatement(updateUserBalanceQuery);
+                        updateUserBalanceStmt.setDouble(1, loanAmount);
+                        updateUserBalanceStmt.setInt(2, userId);
+                        int balanceUpdateRows = updateUserBalanceStmt.executeUpdate();
+                        if (balanceUpdateRows > 0) {
+                            System.out.println(
+                                    "\033[1;32m[Success]\033[0m User balance updated with loan amount for User ID "
+                                            + userId);
+                        } else {
+                            System.out.println(
+                                    "\033[1;31m[Error]\033[0m Failed to update user balance for User ID " + userId);
+                        }
+                        updateUserBalanceStmt.close();
                     } else {
                         System.out.println("\033[1;31m[Error]\033[0m Failed to approve Loan ID " + loanId + ".");
                     }
@@ -538,172 +661,157 @@ public class Admin {
         }
     }
 
-    // private static void checkUserData(String accountNumber, Scanner sc) {
-    // try {
-    // System.out.print("Enter Account Number of the User: ");
-    // int userAcc = sc.nextInt();
-    // String query = "SELECT * FROM users WHERE user_accnum = " + userAcc;
-    // PreparedStatement pstmt = connection.prepareStatement(query);
-    // // pstmt.setString(1, userAcc);
-    // ResultSet rs = pstmt.executeQuery();
-    // boolean userqbool = rs.next();
-    // if (userqbool) {
-    // System.out.println("Required Details");
-    // String userAccNum = rs.getString("user_accNum");
-    // String username = rs.getString("user_name");
-    // Double bal = rs.getDouble("user_bal");
-    // Integer pendingTickets = rs.getInt("user_raisedTick");
-    // Boolean isKycDone = rs.getBoolean("isKycDone");
-    // System.out.println("User Account Number: " + userAccNum);
-    // System.out.println("User Name: " + username);
-    // System.out.println("User Account Balance: " + bal);
-    // System.out.println("User Account Number: " + userAccNum);
-    // }
-    // } catch (SQLException e) {
-    // System.out.println("Error: " + e.getMessage());
-    // }
-    // }
-
     private static void checkUserData(String accountNumber, Scanner sc) {
         try {
             System.out.print("Enter Account Number of the User: ");
             int userAcc = sc.nextInt();
-
-            // Use a prepared statement to avoid SQL injection
-            String query = "SELECT * FROM users WHERE user_accnum = ?";
+            String query = "SELECT * FROM users WHERE user_accnum = " + userAcc;
             PreparedStatement pstmt = connection.prepareStatement(query);
-            pstmt.setInt(1, userAcc);
+            // pstmt.setString(1, userAcc);
+            ResultSet rs = pstmt.executeQuery();
+            boolean userqbool = rs.next();
+            if (userqbool) {
+                System.out.println("\n\033[1;36m--- User Details ---\033[0m");
+                String userAccNum = rs.getString("user_accNum");
+                String username = rs.getString("user_name");
+                Double bal = rs.getDouble("user_bal");
+                Integer pendingTickets = rs.getInt("user_raisedTick");
+                String address = rs.getString("user_address");
+                Integer phone = rs.getInt("user_phone");
+                Integer adhar_num = rs.getInt("adhar_num");
+                Integer pan_num = rs.getInt("pan_num");
+                Integer active_loan = rs.getInt("active_loans");
+                System.out.println("\033[1;34mUser Account Number:\033[0m " + userAccNum);
+                System.out.println("\033[1;34mUser Name:\033[0m " + username);
+                System.out.println("\033[1;34mAccount Balance:\033[0m $" + bal);
+                System.out.println("\033[1;34mUser Address:\033[0m " + address);
+                System.out.println("\033[1;34mUser Phone Number:\033[0m " + phone);
+                System.out.println("\033[1;34mPending Tickets:\033[0m " + pendingTickets);
+                System.out.println("\033[1;34mAadhar Number:\033[0m " + adhar_num);
+                System.out.println("\033[1;34mPan Number:\033[0m " + pan_num);
+                System.out.println("\033[1;34mActive Loans:\033[0m " + active_loan);
+                if (active_loan > 0) {
+                    try {
+                        // Query to fetch active loans for the user
+                        String fetchActiveLoansQuery = "SELECT loanId, loanAmount, loanDescription FROM loan WHERE loanstatus = 'APPROVED' AND userId = ?";
+                        PreparedStatement fetchActiveLoansStmt = connection.prepareStatement(fetchActiveLoansQuery);
+                        fetchActiveLoansStmt.setString(1, userAccNum); // Replace with the current user's ID
+
+                        ResultSet activeLoansRs = fetchActiveLoansStmt.executeQuery();
+
+                        System.out.println("\033[1;36m--- Active Loans Details ---\033[0m");
+                        while (activeLoansRs.next()) {
+                            int loanId = activeLoansRs.getInt("loanId");
+                            double loanAmount = activeLoansRs.getDouble("loanAmount");
+                            String loanDescription = activeLoansRs.getString("loanDescription");
+
+                            // Display loan details
+                            System.out.println("\033[1;32mLoan ID:\033[0m " + loanId);
+                            System.out.println("\033[1;32mDescription:\033[0m " + loanDescription);
+                            System.out.println("\033[1;32mAmount:\033[0m " + loanAmount);
+                            System.out.println("\033[1;34m----------------------------------------\033[0m");
+                        }
+
+                        activeLoansRs.close();
+                        fetchActiveLoansStmt.close();
+                    } catch (SQLException e) {
+                        System.out.println("\033[1;31m[Database Error]\033[0m " + e.getMessage());
+                    }
+                }
+            } else {
+                System.out.println("Account does not exist. Please try again!");
+            }
+        } catch (SQLException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    private static void checkEmployeeData(Scanner sc) {
+        try {
+            System.out.print("\033[1;33m>>\033[0m Enter Employee ID: ");
+            int empId = sc.nextInt();
+            String query = "SELECT * FROM employee WHERE emp_id = ?";
+            PreparedStatement pstmt = connection.prepareStatement(query);
+            pstmt.setInt(1, empId);
+
             ResultSet rs = pstmt.executeQuery();
 
             if (rs.next()) {
-                // Retrieve user details
-                System.out.println("\n\033[1;36m--- User Details ---\033[0m");
-                String userAccNum = rs.getString("user_accnum");
-                String username = rs.getString("user_name");
-                double balance = rs.getDouble("user_bal");
-                int pendingTickets = rs.getInt("user_raisedTick");
-                boolean isKycDone = rs.getBoolean("isKycDone");
+                System.out.println("\n\033[1;36m--- Employee Details ---\033[0m");
+                int employeeId = rs.getInt("emp_id");
+                String empName = rs.getString("emp_name");
+                String empEmail = rs.getString("emp_email");
+                String empPhone = rs.getString("emp_phone");
+                String empAddress = rs.getString("emp_address");
+                double empSalary = rs.getDouble("emp_salary");
+                String empPosition = rs.getString("emp_position");
+                String empDepartment = rs.getString("emp_department");
+                Date empHireDate = rs.getDate("emp_hire_date");
+                int activeLoans = rs.getInt("active_loans");
+                String empStatus = rs.getString("emp_status");
+                long aadharNum = rs.getLong("adhar_num");
+                long panNum = rs.getLong("pan_num");
 
-                // Display user details
-                System.out.println("\033[1;34mUser Account Number:\033[0m " + userAccNum);
-                System.out.println("\033[1;34mUser Name:\033[0m " + username);
-                System.out.println("\033[1;34mAccount Balance:\033[0m ₹" + balance);
-                System.out.println("\033[1;34mPending Tickets:\033[0m " + pendingTickets);
-                System.out.println("\033[1;34mKYC Status:\033[0m " + (isKycDone ? "Completed" : "Pending"));
+                // Display Employee Details
+                System.out.println("\033[1;34mEmployee ID:\033[0m " + employeeId);
+                System.out.println("\033[1;34mName:\033[0m " + empName);
+                System.out.println("\033[1;34mEmail:\033[0m " + empEmail);
+                System.out.println("\033[1;34mPhone:\033[0m " + empPhone);
+                System.out.println("\033[1;34mAddress:\033[0m " + empAddress);
+                System.out.println("\033[1;34mSalary:\033[0m ₹" + empSalary);
+                System.out.println("\033[1;34mPosition:\033[0m " + empPosition);
+                System.out.println("\033[1;34mDepartment:\033[0m " + empDepartment);
+                System.out.println("\033[1;34mHire Date:\033[0m " + empHireDate);
+                System.out.println("\033[1;34mActive Loans:\033[0m " + activeLoans);
+                System.out.println("\033[1;34mStatus:\033[0m " + empStatus);
+                System.out.println("\033[1;34mAadhar Number:\033[0m " + aadharNum);
+                System.out.println("\033[1;34mPAN Number:\033[0m " + panNum);
+
+                if (activeLoans > 0) {
+                    try {
+                        // Query to fetch active loans for the employee
+                        String fetchActiveLoansQuery = "SELECT loanId, loanAmount, loanDescription FROM loan WHERE loanstatus = 'APPROVED' AND userId = ?";
+                        PreparedStatement fetchActiveLoansStmt = connection.prepareStatement(fetchActiveLoansQuery);
+                        fetchActiveLoansStmt.setInt(1, empId);
+
+                        ResultSet activeLoansRs = fetchActiveLoansStmt.executeQuery();
+
+                        System.out.println("\n\033[1;36m--- Active Loans Details ---\033[0m");
+                        while (activeLoansRs.next()) {
+                            int loanId = activeLoansRs.getInt("loanId");
+                            double loanAmount = activeLoansRs.getDouble("loanAmount");
+                            String loanDescription = activeLoansRs.getString("loanDescription");
+
+                            // Display Loan Details
+                            System.out.println("\033[1;32mLoan ID:\033[0m " + loanId);
+                            System.out.println("\033[1;32mDescription:\033[0m " + loanDescription);
+                            System.out.println("\033[1;32mAmount:\033[0m ₹" + loanAmount);
+                            System.out.println("\033[1;34m----------------------------------------\033[0m");
+                        }
+
+                        activeLoansRs.close();
+                        fetchActiveLoansStmt.close();
+                    } catch (SQLException e) {
+                        System.out.println("\033[1;31m[Database Error]\033[0m " + e.getMessage());
+                    }
+                }
             } else {
-                System.out.println("\033[1;31mNo user found with the provided account number.\033[0m");
+                System.out.println("\033[1;31m[Error]\033[0m Employee does not exist. Please try again!");
             }
 
             rs.close();
             pstmt.close();
         } catch (SQLException e) {
-            System.out.println("\033[1;31mDatabase Error:\033[0m " + e.getMessage());
+            System.out.println("\033[1;31m[Database Error]\033[0m " + e.getMessage());
         } catch (Exception e) {
-            System.out.println("\033[1;31mUnexpected Error:\033[0m " + e.getMessage());
+            System.out.println("\033[1;31m[Unexpected Error]\033[0m " + e.getMessage());
         }
     }
-
-    // private static void deposit(String accountNumber, Scanner scanner) {
-    // try {
-    // System.out.print("Enter deposit amount: ");
-    // double amount = scanner.nextDouble();
-
-    // String updateQuery = "UPDATE accounts SET balance = balance + ? WHERE
-    // account_number = ?";
-    // PreparedStatement updateStmt = connection.prepareStatement(updateQuery);
-    // updateStmt.setDouble(1, amount);
-    // updateStmt.setString(2, accountNumber);
-    // updateStmt.executeUpdate();
-
-    // String insertTransactionQuery = "INSERT INTO transactions (account_number,
-    // type, amount) VALUES (?, 'DEPOSIT', ?)";
-    // PreparedStatement transactionStmt =
-    // connection.prepareStatement(insertTransactionQuery);
-    // transactionStmt.setString(1, accountNumber);
-    // transactionStmt.setDouble(2, amount);
-    // transactionStmt.executeUpdate();
-
-    // System.out.println("Deposit successful!");
-    // } catch (SQLException e) {
-    // System.out.println("Error: " + e.getMessage());
-    // }
-    // }
-
-    // private static void clearPendingTickets(Scanner sc) {
-    // try {
-    // // Fetch all pending tickets
-    // String fetchQuery = "SELECT ticket_id, ticket_description FROM tickets WHERE
-    // ticket_status = 'Pending'";
-    // PreparedStatement fetchStmt = connection.prepareStatement(fetchQuery);
-    // ResultSet rs = fetchStmt.executeQuery();
-
-    // System.out.println("\n--- Pending Tickets ---");
-    // List<Integer> ticketIds = new ArrayList<>();
-    // while (rs.next()) {
-    // int ticketId = rs.getInt("ticket_id");
-    // String ticketDescription = rs.getString("ticket_description");
-    // ticketIds.add(ticketId);
-    // System.out.println("Ticket ID: " + ticketId + " | Description: " +
-    // ticketDescription);
-    // }
-
-    // if (ticketIds.isEmpty()) {
-    // System.out.println("No pending tickets found.");
-    // } else {
-    // // Ask user to decide which ticket(s) to clear
-    // System.out.print("\nEnter the Ticket ID(s) to clear (comma-separated, or type
-    // 'all' to clear all): ");
-    // sc.nextLine(); // Clear scanner buffer
-    // String input = sc.nextLine();
-
-    // List<Integer> ticketsToClear = new ArrayList<>();
-    // if (input.equalsIgnoreCase("all")) {
-    // ticketsToClear.addAll(ticketIds);
-    // } else {
-    // // Parse user input for specific Ticket IDs
-    // String[] inputIds = input.split(",");
-    // for (String id : inputIds) {
-    // try {
-    // int ticketId = Integer.parseInt(id.trim());
-    // if (ticketIds.contains(ticketId)) {
-    // ticketsToClear.add(ticketId);
-    // } else {
-    // System.out.println("Invalid Ticket ID: " + ticketId);
-    // }
-    // } catch (NumberFormatException e) {
-    // System.out.println("Invalid input: " + id + " is not a valid number.");
-    // }
-    // }
-    // }
-
-    // // Clear selected tickets
-    // for (int ticketId : ticketsToClear) {
-    // String clearQuery = "UPDATE tickets SET ticket_status = 'Resolved' WHERE
-    // ticket_id = ?";
-    // PreparedStatement clearStmt = connection.prepareStatement(clearQuery);
-    // clearStmt.setInt(1, ticketId);
-
-    // int rowsAffected = clearStmt.executeUpdate();
-    // if (rowsAffected > 0) {
-    // System.out.println("Ticket ID " + ticketId + " has been cleared.");
-    // } else {
-    // System.out.println("Failed to clear Ticket ID " + ticketId + ".");
-    // }
-    // clearStmt.close();
-    // }
-    // }
-
-    // rs.close();
-    // fetchStmt.close();
-    // } catch (SQLException e) {
-    // System.out.println("Error: " + e.getMessage());
-    // }
-    // }
 
     private static void clearPendingTickets(Scanner sc) {
         try {
             // Fetch all pending tickets
-            String fetchQuery = "SELECT ticket_id, ticket_description FROM tickets WHERE ticket_status = 'Pending'";
+            String fetchQuery = "SELECT * FROM tickets WHERE ticket_status = 'Pending'";
             PreparedStatement fetchStmt = connection.prepareStatement(fetchQuery);
             ResultSet rs = fetchStmt.executeQuery();
 
@@ -712,9 +820,10 @@ public class Admin {
             while (rs.next()) {
                 int ticketId = rs.getInt("ticket_id");
                 String ticketDescription = rs.getString("ticket_description");
+                String userInfo = rs.getString("user_info");
                 ticketIds.add(ticketId);
                 System.out.println("\033[1;33mTicket ID:\033[0m " + ticketId + " | \033[1;36mDescription:\033[0m "
-                        + ticketDescription);
+                        + ticketDescription + " | \033[1;36mDescription:\033[0m " + userInfo);
             }
 
             if (ticketIds.isEmpty()) {

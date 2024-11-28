@@ -111,9 +111,11 @@ public class User {
                     String loanStatus = rs.getString("loanstatus");
                     // String appliedDate = rs.getString("applied_date");
 
-                    System.out.printf("Loan ID: %d  | Amount: $%.2f | Status: %s ",
+                    System.out.printf("\nLoan ID: %d  | Amount: $%.2f | Status: %s ",
                             loanId, loanAmount, loanStatus);
+
                 }
+
             }
         } catch (SQLException e) {
             System.out.println("Error fetching loan status: " + e.getMessage());
@@ -132,7 +134,7 @@ public class User {
             PreparedStatement maxAccNumStmt = connection.prepareStatement(getMaxAccNumQuery);
             ResultSet rs = maxAccNumStmt.executeQuery();
 
-            int startingPoint = 5548554; // Starting account number
+            int startingPoint = 1000; // Starting account number
             int ticketRef = startingPoint; // Default to starting point if no users exist
 
             if (rs.next()) {

@@ -39,6 +39,12 @@ public class Employee {
         }
     }
 
+    private static void printHeader(String title) {
+        System.out.println("\033[1;36m=========================================");
+        System.out.println("           " + title);
+        System.out.println("=========================================\033[0m");
+    }
+
     private static void showAccountMenu(String accountNumber) {
         Scanner scanner = new Scanner(System.in);
         boolean logout = false;
@@ -119,34 +125,42 @@ public class Employee {
 
     private static void registerUser(Scanner sc) {
         try {
-            System.out.println("\n--- Register New User ---");
+            printHeader("Register New User");
 
             // Prompt for user details
-            System.out.print("Enter Full Name: ");
+            System.out.print("\033[1;33m>>\033[0m Enter Full Name: ");
             sc.nextLine(); // Consume leftover newline
             String userName = sc.nextLine();
 
-            System.out.print("Enter Address: ");
+            System.out.print("\033[1;33m>>\033[0m Enter Address: ");
             String userAddress = sc.nextLine();
 
-            System.out.print("Enter Contact Number: ");
+            System.out.print("\033[1;33m>>\033[0m Enter Contact Number (10 digits): ");
             String userPhone = sc.nextLine();
+            while (!userPhone.matches("\\d{10}")) {
+                System.out.print("\033[1;31m[Error]\033[0m Invalid number. Re-enter Contact Number: ");
+                userPhone = sc.nextLine();
+            }
 
-            System.out.print("Enter Aadhaar Number: ");
+            System.out.print("\033[1;33m>>\033[0m Enter Aadhaar Number (12 digits): ");
             String aadharNum = sc.nextLine();
+            while (!aadharNum.matches("\\d{12}")) {
+                System.out.print("\033[1;31m[Error]\033[0m Invalid Aadhaar. Re-enter Aadhaar Number: ");
+                aadharNum = sc.nextLine();
+            }
 
-            System.out.print("Enter PAN Number: ");
+            System.out.print("\033[1;33m>>\033[0m Enter PAN Number: ");
             String panNum = sc.nextLine();
 
-            System.out.print("Create Password: ");
+            System.out.print("\033[1;33m>>\033[0m Create Password: ");
             String userPass = sc.nextLine();
 
-            System.out.print("Enter Initial Deposit Amount: ");
+            System.out.print("\033[1;33m>>\033[0m Enter Initial Deposit Amount: ");
             double userBal = sc.nextDouble();
 
             // Validate initial deposit
             if (userBal < 500) {
-                System.out.println("Error: Minimum deposit amount is ₹500.");
+                System.out.println("\033[1;31m[Error]\033[0m Minimum deposit amount is ₹500.");
                 return;
             }
 
@@ -160,16 +174,15 @@ public class Employee {
 
             if (rs.next()) {
                 long maxAccNum = rs.getLong("MAX_ACCNUM");
-                userAccNum = Math.max(maxAccNum + 1, startingPoint); // Ensure it starts from the defined starting point
+                userAccNum = Math.max(maxAccNum + 1, startingPoint);
             }
 
             // Insert the user details into the database
             String insertQuery = "INSERT INTO users (USER_ACCNUM, USER_NAME, USER_BAL, USER_RAISEDTICK, " +
                     "USER_ADDRESS, USER_PHONE, ADHAR_NUM, PAN_NUM, USER_PASS) " +
                     "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-
             PreparedStatement pstmt = connection.prepareStatement(insertQuery);
-            pstmt.setLong(1, userAccNum); // Use the calculated account number
+            pstmt.setLong(1, userAccNum);
             pstmt.setString(2, userName);
             pstmt.setDouble(3, userBal);
             pstmt.setInt(4, 0); // Initially no raised tickets
@@ -182,16 +195,16 @@ public class Employee {
             int rowsAffected = pstmt.executeUpdate();
 
             if (rowsAffected > 0) {
-                System.out.println("User registration successful!");
-                System.out.println("Generated Account Number: " + userAccNum);
+                System.out.println("\033[1;32m[Success]\033[0m User registration successful!");
+                System.out.println("\033[1;34m[Info]\033[0m Generated Account Number: " + userAccNum);
             } else {
-                System.out.println("Error: Failed to register the user.");
+                System.out.println("\033[1;31m[Error]\033[0m Failed to register the user.");
             }
 
         } catch (SQLException e) {
-            System.out.println("Database Error: " + e.getMessage());
+            System.out.println("\033[1;31m[Database Error]\033[0m " + e.getMessage());
         } catch (Exception e) {
-            System.out.println("Unexpected Error: " + e.getMessage());
+            System.out.println("\033[1;31m[Unexpected Error]\033[0m " + e.getMessage());
         }
     }
 
@@ -248,7 +261,7 @@ public class Employee {
                     int rowsAffected = clearStmt.executeUpdate();
                     if (rowsAffected > 0) {
 
-                        System.out.println("Loan ID " + loanId + " has been approved.");
+                        System.out.println("Loan ID " + loanId + " has been verified.");
                     } else {
                         System.out.println("Failed to verify Loan ID " + loanId + ".");
                     }
@@ -286,6 +299,7 @@ public class Employee {
                 System.out.println("User Name: " + username);
                 System.out.println("User Address: " + address);
                 System.out.println("User Phone Number: " + phone);
+                System.out.println("User Balance: " + bal);
                 System.out.println("Tickets Pending for User: " + pendingTickets);
             } else {
                 System.out.println("Account does not exist. Please try again!");

@@ -448,50 +448,53 @@ public class Employee {
 
     private static void withdraw(Scanner scanner) {
         try {
-            System.out.print("Enter Account Number of the User: ");
+            System.out.print("\033[1;33m>>\033[0m Enter Account Number of the User: ");
             int userAcc = scanner.nextInt();
-            String checkquery = "SELECT * FROM users where user_accnum=?";
-            PreparedStatement checkingPreparedStatement = connection.prepareStatement(checkquery);
-            checkingPreparedStatement.setInt(1, userAcc);
 
-            int testrows = checkingPreparedStatement.executeUpdate();
-            if (testrows > 0) {
-                System.out.print("Enter withdrawal amount: ");
+            // Validate account existence
+            String checkQuery = "SELECT user_bal FROM users WHERE user_accnum = ?";
+            PreparedStatement checkStmt = connection.prepareStatement(checkQuery);
+            checkStmt.setInt(1, userAcc);
+            ResultSet rs = checkStmt.executeQuery();
+
+            if (rs.next()) {
+                double currentBalance = rs.getDouble("user_bal"); // Retrieve current balance
+
+                System.out.print("\033[1;33m>>\033[0m Enter withdrawal amount: ");
                 double amount = scanner.nextDouble();
 
-                String checkBalanceQuery = "SELECT balance FROM accounts WHERE account_number = ?";
-                PreparedStatement checkStmt = connection.prepareStatement(checkBalanceQuery);
-                checkStmt.setInt(1, userAcc);
-                ResultSet rs = checkStmt.executeQuery();
+                // Validate sufficient funds
+                if (amount > 0 && currentBalance >= amount) {
+                    // Update the user's balance
+                    String updateQuery = "UPDATE users SET user_bal = user_bal - ? WHERE user_accnum = ?";
+                    PreparedStatement updateStmt = connection.prepareStatement(updateQuery);
+                    updateStmt.setDouble(1, amount);
+                    updateStmt.setInt(2, userAcc);
+                    updateStmt.executeUpdate();
 
-                if (rs.next()) {
-                    double currentBalance = rs.getDouble("balance");
-                    if (currentBalance >= amount) {
-                        String updateQuery = "UPDATE accounts SET balance = balance - ? WHERE account_number = ?";
-                        PreparedStatement updateStmt = connection.prepareStatement(updateQuery);
-                        updateStmt.setDouble(1, amount);
-                        updateStmt.setInt(2, userAcc);
-                        updateStmt.executeUpdate();
+                    // Insert transaction record
+                    String insertTransactionQuery = "INSERT INTO transactions (sender_id, receiver_id, amount, trans_type) VALUES (?, ?, ?, 'WITHDRAWAL')";
+                    PreparedStatement transactionStmt = connection.prepareStatement(insertTransactionQuery);
+                    transactionStmt.setInt(1, userAcc); // Sender ID
+                    transactionStmt.setInt(2, userAcc); // Receiver ID (self for withdrawal)
+                    transactionStmt.setDouble(3, amount);
+                    transactionStmt.executeUpdate();
 
-                        String insertTransactionQuery = "INSERT INTO transactions (account_number, type, amount) VALUES (?, 'WITHDRAWAL', ?)";
-                        PreparedStatement transactionStmt = connection.prepareStatement(insertTransactionQuery);
-                        transactionStmt.setInt(1, userAcc);
-                        transactionStmt.setDouble(2, amount);
-                        transactionStmt.executeUpdate();
-
-                        System.out.println("Withdrawal successful!");
-                    } else {
-                        System.out.println("Insufficient funds!");
-                    }
+                    System.out
+                            .println("\033[1;32m[Success]\033[0m Withdrawal successful! Amount Withdrawn: $" + amount);
+                } else if (amount <= 0) {
+                    System.out.println("\033[1;31m[Error]\033[0m Withdrawal amount must be greater than zero.");
+                } else {
+                    System.out.println(
+                            "\033[1;31m[Error]\033[0m Insufficient funds! Current Balance: $" + currentBalance);
                 }
-
-                System.out.println("\nDeposit successful!");
             } else {
-                System.out.println("\nAccount Number does not exist");
+                System.out.println("\033[1;31m[Error]\033[0m Account Number does not exist.");
             }
-
         } catch (SQLException e) {
-            System.out.println("Error: " + e.getMessage());
+            System.out.println("\033[1;31m[Database Error]\033[0m " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("\033[1;31m[Unexpected Error]\033[0m " + e.getMessage());
         }
     }
 

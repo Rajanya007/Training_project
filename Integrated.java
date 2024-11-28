@@ -28,11 +28,17 @@ public class Integrated {
     }
 
     private static void displayMainMenu() {
-        System.out.println("\n--- Online Banking System ---");
-        System.out.println("1. User Login");
-        System.out.println("2. Employee Login");
-        System.out.println("3. Admin Login");
-        System.out.println("4. Exit");
-        System.out.print("Enter your choice: ");
+        System.out.println("\033[0;36m"); // Set text color to cyan
+        System.out.println("============================================");
+        System.out.println("       \033[1;35m--- Online Banking System ---\033[0;36m");
+        System.out.println("============================================\033[0m");
+        System.out.println();
+        System.out.println("\033[1;34mPlease select an option:\033[0m");
+        System.out.println("\033[1;32m1.\033[0m \033[0;37mUser Login\033[0m");
+        System.out.println("\033[1;32m2.\033[0m \033[0;37mEmployee Login\033[0m");
+        System.out.println("\033[1;32m3.\033[0m \033[0;37mAdmin Login\033[0m");
+        System.out.println("\033[1;32m4.\033[0m \033[0;37mExit\033[0m");
+        System.out.println();
+        System.out.print("\033[1;33mEnter your choice: \033[0m");
     }
 }

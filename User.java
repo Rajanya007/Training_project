@@ -41,7 +41,6 @@ public class User {
         while (!logout) {
             System.out.println("\n--- Account Menu ---");
             System.out.println("1. Check Balance");
-
             System.out.println("2. Transfer Funds");
             System.out.println("3. Transaction History");
             System.out.println("4. Apply Loan");

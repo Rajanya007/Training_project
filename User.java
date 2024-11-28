@@ -11,45 +11,57 @@ public class User {
     // DONE
     public static void user_login(Scanner scanner) {
         try {
-            System.out.print("Enter Account Number: ");
+            System.out.println("\033[1;36m----------------------------------------------\033[0m");
+            System.out.println("\033[1;33m        --- User Login ---\033[0m");
+            System.out.println("\033[1;36m----------------------------------------------\033[0m");
+    
+            System.out.print("\033[1;34mEnter Account Number: \033[0m");
             String accountNumber = scanner.next();
-            System.out.print("Enter Password: ");
+    
+            System.out.print("\033[1;34mEnter Password: \033[0m");
             String pass = scanner.next();
-
-            String query = "SELECT * FROM users WHERE user_accnum = '" + accountNumber + "' AND user_pass = '" + pass
-                    + "'";
+    
+            String query = "SELECT * FROM users WHERE user_accnum = ? AND user_pass = ?";
             PreparedStatement pstmt = connection.prepareStatement(query);
-
+            pstmt.setString(1, accountNumber);
+            pstmt.setString(2, pass);
+    
             ResultSet rs = pstmt.executeQuery();
-            Boolean resBool = rs.next();
-            if (resBool) {
+            if (rs.next()) {
                 String customerName = rs.getString("user_name");
-                System.out.println("\nLogin Successful. Welcome, " + customerName);
+                System.out.println("\n\033[1;32mLogin Successful. Welcome, " + customerName + "!\033[0m");
                 showUserAccountMenu(accountNumber);
             } else {
-                System.out.println("Invalid Account Number or Password");
+                System.out.println("\033[1;31mInvalid Account Number or Password. Please try again.\033[0m");
             }
         } catch (SQLException e) {
-            System.out.println("Error: " + e.getMessage());
+            System.out.println("\033[1;31mError: Database connection failed. Please check your connection or contact support.\033[0m");
+            System.out.println("\033[1;31mDetails: " + e.getMessage() + "\033[0m");
+        } catch (Exception e) {
+            System.out.println("\033[1;31mUnexpected error occurred. Please try again later.\033[0m");
+            System.out.println("\033[1;31mDetails: " + e.getMessage() + "\033[0m");
         }
     }
-
+    
     private static void showUserAccountMenu(String accountNumber) {
         Scanner scanner = new Scanner(System.in);
         boolean logout = false;
-
+    
         while (!logout) {
-            System.out.println("\n--- Account Menu ---");
-            System.out.println("1. Check Balance");
-            System.out.println("2. Transfer Funds");
-            System.out.println("3. Transaction History");
-            System.out.println("4. Apply Loan");
-            System.out.println("5. Having any issue? Raise a ticket");
-            System.out.println("6. Check Loan Status");
-            System.out.println("7. Check Ticket Status");
-            System.out.println("8. Logout");
-            System.out.print("Enter your choice: ");
-
+            System.out.println("\033[1;36m----------------------------------------------\033[0m");
+            System.out.println("\033[1;33m        --- Account Menu ---\033[0m");
+            System.out.println("\033[1;36m----------------------------------------------\033[0m");
+    
+            System.out.println("\033[1;32m1.\033[0m \033[0;37mCheck Balance\033[0m");
+            System.out.println("\033[1;32m2.\033[0m \033[0;37mTransfer Funds\033[0m");
+            System.out.println("\033[1;32m3.\033[0m \033[0;37mTransaction History\033[0m");
+            System.out.println("\033[1;32m4.\033[0m \033[0;37mApply Loan\033[0m");
+            System.out.println("\033[1;32m5.\033[0m \033[0;37mRaise an Issue (Ticket)\033[0m");
+            System.out.println("\033[1;32m6.\033[0m \033[0;37mCheck Loan Status\033[0m");
+            System.out.println("\033[1;32m7.\033[0m \033[0;37mCheck Ticket Status\033[0m");
+            System.out.println("\033[1;32m8.\033[0m \033[0;37mLogout\033[0m");
+            System.out.print("\033[1;33mEnter your choice: \033[0m");
+    
             String choice = scanner.next();
             switch (choice) {
                 case "1" -> checkUserBalance(accountNumber);
@@ -59,109 +71,109 @@ public class User {
                 case "5" -> raiseTicket(accountNumber, scanner);
                 case "6" -> checkLoanStatus(accountNumber, scanner);
                 case "7" -> checkTicketStatus(accountNumber, scanner);
-                case "8" -> logout = true;
-                default -> System.out.println("Invalid option. Try again.");
+                case "8" -> {
+                    System.out.println("\033[1;32mLogging out... Goodbye!\033[0m");
+                    logout = true;
+                }
+                default -> System.out.println("\033[1;31mInvalid option. Please try again.\033[0m");
             }
         }
     }
-
+    
     // done
     private static void checkTicketStatus(String accountNumber, Scanner sc) {
         try {
             String query = "SELECT * FROM tickets WHERE user_info = ?";
             PreparedStatement pstmt = connection.prepareStatement(query);
             pstmt.setString(1, accountNumber);
-
+    
             ResultSet rs = pstmt.executeQuery();
-            System.out.println("\n--- Ticket Status ---");
+            System.out.println("\033[1;36m\n--- Ticket Status ---\033[0m");
+            
             if (!rs.isBeforeFirst()) {
-                System.out.println("No tickets found for your account.");
+                System.out.println("\033[1;31mNo tickets found for your account.\033[0m");
             } else {
                 while (rs.next()) {
                     int ticketId = rs.getInt("ticket_id");
                     String ticketDesc = rs.getString("ticket_description");
                     String ticketStatus = rs.getString("ticket_status");
-                    // String raisedDate = rs.getString("raised_date");
-
-                    System.out.printf("\nTicket ID: %d | Description: %s | Status: %s ",
+    
+                    System.out.printf("\n\033[1;32mTicket ID: %d | Description: %s | Status: %s\033[0m\n",
                             ticketId, ticketDesc, ticketStatus);
                 }
             }
         } catch (SQLException e) {
-            System.out.println("Error fetching ticket status: " + e.getMessage());
+            System.out.println("\033[1;31mError fetching ticket status: " + e.getMessage() + "\033[0m");
         }
     }
-
+    
     // pending
     private static void checkLoanStatus(String accountNumber, Scanner sc) {
         try {
             String query = "SELECT * FROM loan WHERE userid = ?";
             PreparedStatement pstmt = connection.prepareStatement(query);
             pstmt.setString(1, accountNumber);
-
+    
             ResultSet rs = pstmt.executeQuery();
-            System.out.println("\n--- Loan Application Status ---");
+            System.out.println("\033[1;36m\n--- Loan Application Status ---\033[0m");
+    
             if (!rs.isBeforeFirst()) {
-                System.out.println("No loan applications found for your account.");
+                System.out.println("\033[1;31mNo loan applications found for your account.\033[0m");
             } else {
                 while (rs.next()) {
                     int loanId = rs.getInt("loanid");
-                    // String loanType = rs.getString("loan_type");
                     double loanAmount = rs.getDouble("loanamount");
                     String loanStatus = rs.getString("loanstatus");
-                    // String appliedDate = rs.getString("applied_date");
-
-                    System.out.printf("\nLoan ID: %d  | Amount: $%.2f | Status: %s ",
+    
+                    System.out.printf("\n\033[1;32mLoan ID: %d | Amount: $%.2f | Status: %s\033[0m\n",
                             loanId, loanAmount, loanStatus);
-
                 }
-
             }
         } catch (SQLException e) {
-            System.out.println("Error fetching loan status: " + e.getMessage());
+            System.out.println("\033[1;31mError fetching loan status: " + e.getMessage() + "\033[0m");
         }
     }
-
+    
     // done
     private static void raiseTicket(String accountNumber, Scanner sc) {
         try {
-            System.out.println("\n--- Raise a Ticket ---");
-            System.out.print("Enter a brief description of your issue: ");
+            System.out.println("\n\033[1;36m--- Raise a Ticket ---\033[0m");
+            System.out.print("\033[1;33mEnter a brief description of your issue: \033[0m");
             sc.nextLine(); // Consume leftover newline
             String description = sc.nextLine();
-
+    
             String getMaxAccNumQuery = "SELECT MAX(ticket_id) as maxticket FROM tickets";
             PreparedStatement maxAccNumStmt = connection.prepareStatement(getMaxAccNumQuery);
             ResultSet rs = maxAccNumStmt.executeQuery();
-
-            int startingPoint = 1000; // Starting account number
-            int ticketRef = startingPoint; // Default to starting point if no users exist
-
+    
+            int startingPoint = 1000; // Starting ticket ID
+            int ticketRef = startingPoint; // Default to starting point if no tickets exist
+    
             if (rs.next()) {
                 int maxAccNum = rs.getInt("maxticket");
                 ticketRef = Math.max(maxAccNum + 1, startingPoint); // Ensure it starts from the defined starting point
             }
+    
             String query = "INSERT INTO tickets (ticket_id, ticket_description, ticket_status, user_info) " +
-                    "VALUES (?, ?, 'Pending',?)";
+                    "VALUES (?, ?, 'Pending', ?)";
             PreparedStatement pstmt = connection.prepareStatement(query);
             pstmt.setInt(1, ticketRef);
             pstmt.setString(2, description);
             pstmt.setString(3, accountNumber);
-
+    
             int rowsInserted = pstmt.executeUpdate();
             if (rowsInserted > 0) {
-                System.out.println("Your ticket has been raised successfully!");
-                System.out.println("Ticket ID: " + ticketRef);
+                System.out.println("\033[1;32mYour ticket has been raised successfully!\033[0m");
+                System.out.println("\033[1;33mTicket ID: " + ticketRef + "\033[0m");
             } else {
-                System.out.println("Failed to raise the ticket. Please try again.");
+                System.out.println("\033[1;31mFailed to raise the ticket. Please try again.\033[0m");
             }
-            // Display the ticket ID
-
+    
         } catch (SQLException e) {
-            System.out.println("Error raising ticket: " + e.getMessage());
+            System.out.println("\033[1;31mError raising ticket: " + e.getMessage() + "\033[0m");
         }
     }
-
+    
     // DONE
     private static void checkUserBalance(String accountNumber) {
         try {
@@ -169,52 +181,70 @@ public class User {
             PreparedStatement pstmt = connection.prepareStatement(query);
             pstmt.setString(1, accountNumber);
             ResultSet rs = pstmt.executeQuery();
-            Boolean boolRs = rs.next();
-            if (boolRs) {
+    
+            if (rs.next()) {
                 double balance = rs.getDouble("user_bal");
-                System.out.printf("\nCurrent Balance: $%.2f%n", balance);
+                System.out.printf("\n\033[1;36mCurrent Balance: \033[0m\033[1;32m$%.2f\033[0m%n", balance);
+            } else {
+                System.out.println("\033[1;31mAccount not found. Please check your account number.\033[0m");
             }
         } catch (SQLException e) {
-            System.out.println("Error: " + e.getMessage());
+            System.out.println("\033[1;31mError checking balance: " + e.getMessage() + "\033[0m");
         }
     }
-
+    
     // DONE
     private static void deposit(String accountNumber, Scanner scanner) {
         try {
-            System.out.print("Enter deposit amount: ");
+            System.out.print("\033[1;36mEnter deposit amount: \033[0m");
             double amount = scanner.nextDouble();
-
+    
+            if (amount <= 0) {
+                System.out.println("\033[1;31mInvalid amount. Please enter a positive value.\033[0m");
+                return;
+            }
+    
             String updateQuery = "UPDATE users SET user_bal = user_bal + ? WHERE user_accnum = ?";
             PreparedStatement updateStmt = connection.prepareStatement(updateQuery);
             updateStmt.setDouble(1, amount);
             updateStmt.setString(2, accountNumber);
-            updateStmt.executeUpdate();
-
-            String insertTransactionQuery = "INSERT INTO transactions (sender_id, receiver_id, amount,trans_type) VALUES (?,?,?, 'DEPOSIT')";
-            PreparedStatement transactionStmt = connection.prepareStatement(insertTransactionQuery);
-            transactionStmt.setString(1, accountNumber);
-            transactionStmt.setString(2, accountNumber);
-            transactionStmt.setDouble(3, amount);
-            transactionStmt.executeUpdate();
-
-            System.out.println("\nDeposit successful!");
+            int rowsUpdated = updateStmt.executeUpdate();
+    
+            if (rowsUpdated > 0) {
+                String insertTransactionQuery = "INSERT INTO transactions (sender_id, receiver_id, amount, trans_type) VALUES (?, ?, ?, 'DEPOSIT')";
+                PreparedStatement transactionStmt = connection.prepareStatement(insertTransactionQuery);
+                transactionStmt.setString(1, accountNumber);
+                transactionStmt.setString(2, accountNumber);
+                transactionStmt.setDouble(3, amount);
+                transactionStmt.executeUpdate();
+    
+                System.out.println("\n\033[1;32mDeposit successful! Your balance has been updated.\033[0m");
+            } else {
+                System.out.println("\033[1;31mAccount not found or deposit failed. Please try again.\033[0m");
+            }
+    
         } catch (SQLException e) {
-            System.out.println("\nError: " + e.getMessage());
+            System.out.println("\033[1;31mError during deposit: " + e.getMessage() + "\033[0m");
         }
     }
-
+    
     // DONE
     private static void withdraw(String accountNumber, Scanner scanner) {
         try {
-            System.out.print("Enter withdrawal amount: ");
+            System.out.print("\033[1;36mEnter withdrawal amount: \033[0m");
             double amount = scanner.nextDouble();
-
+    
+            if (amount <= 0) {
+                System.out.println("\033[1;31mInvalid amount. Please enter a positive value.\033[0m");
+                return;
+            }
+    
             String checkBalanceQuery = "SELECT user_bal FROM users WHERE user_accnum = ?";
             PreparedStatement checkStmt = connection.prepareStatement(checkBalanceQuery);
             checkStmt.setString(1, accountNumber);
             ResultSet rs = checkStmt.executeQuery();
             Boolean booRs = rs.next();
+            
             if (booRs) {
                 double currentBalance = rs.getDouble("user_bal");
                 if (currentBalance >= amount) {
@@ -223,236 +253,265 @@ public class User {
                     updateStmt.setDouble(1, amount);
                     updateStmt.setString(2, accountNumber);
                     updateStmt.executeUpdate();
-
-                    String insertTransactionQuery = "INSERT INTO transactions (sender_id, receiver_id, amount,trans_type) VALUES (?,?,?, 'WITHDRAWAL')";
+    
+                    String insertTransactionQuery = "INSERT INTO transactions (sender_id, receiver_id, amount, trans_type) VALUES (?, ?, ?, 'WITHDRAWAL')";
                     PreparedStatement transactionStmt = connection.prepareStatement(insertTransactionQuery);
                     transactionStmt.setString(1, accountNumber);
                     transactionStmt.setString(2, accountNumber);
                     transactionStmt.setDouble(3, amount);
                     transactionStmt.executeUpdate();
-
-                    System.out.println("\nWithdrawal successful!");
+    
+                    System.out.println("\n\033[1;32mWithdrawal successful! Your balance has been updated.\033[0m");
                 } else {
-                    System.out.println("\nInsufficient funds!");
+                    System.out.println("\033[1;31mInsufficient funds! Please ensure you have enough balance to withdraw.\033[0m");
                 }
+            } else {
+                System.out.println("\033[1;31mAccount not found. Please check your account number.\033[0m");
             }
+    
         } catch (SQLException e) {
-            System.out.println("Error: " + e.getMessage());
+            System.out.println("\033[1;31mError during withdrawal: " + e.getMessage() + "\033[0m");
         }
     }
-
+    
     // DONE
     private static void userTransferFunds(String sourceAccount, Scanner scanner) {
         try {
-            System.out.print("Enter destination account number: ");
+            System.out.print("\033[1;36mEnter destination account number: \033[0m");
             String destinationAccount = scanner.next();
-
+    
+            // Check if the destination account exists
             String checkDestinationQuery = "SELECT * FROM users WHERE user_accnum = ?";
             PreparedStatement checkDestStmt = connection.prepareStatement(checkDestinationQuery);
             checkDestStmt.setString(1, destinationAccount);
             ResultSet destRs = checkDestStmt.executeQuery();
-            Boolean checke = destRs.next();
-            if (!checke) {
-                System.out.println("\nDestination account does not exist. Transfer aborted.");
+            if (!destRs.next()) {
+                System.out.println("\033[1;31mDestination account does not exist. Transfer aborted.\033[0m");
                 return;
             }
+    
+            // Get transfer amount
             double amount = 0;
             while (true) {
-                System.out.print("Enter transfer amount: ");
+                System.out.print("\033[1;36mEnter transfer amount: \033[0m");
                 if (scanner.hasNextDouble()) {
-
                     amount = scanner.nextDouble();
+                    if (amount <= 0) {
+                        System.out.println("\033[1;31mInvalid amount. Please enter a positive value.\033[0m");
+                        continue;
+                    }
                     break;
                 } else {
-                    System.out.println("Invalid Transfer Amount");
-                    scanner.next();
-
+                    System.out.println("\033[1;31mInvalid Transfer Amount. Please enter a numeric value.\033[0m");
+                    scanner.next(); // Consume invalid input
                 }
             }
-
-            System.out.print("Enter your password: ");
+    
+            // Verify user password
+            System.out.print("\033[1;36mEnter your password: \033[0m");
             String pass = scanner.next();
-
-            String checkBalanceQuery = "SELECT * FROM users WHERE user_accnum = ? and user_pass= ?";
+    
+            String checkBalanceQuery = "SELECT * FROM users WHERE user_accnum = ? AND user_pass = ?";
             PreparedStatement checkStmt = connection.prepareStatement(checkBalanceQuery);
             checkStmt.setString(1, sourceAccount);
             checkStmt.setString(2, pass);
             ResultSet rs = checkStmt.executeQuery();
-            Boolean ifUserPassOk = rs.next();
-            if (ifUserPassOk) {
+    
+            if (rs.next()) {
                 double currentBalance = rs.getDouble("user_bal");
+    
+                // Check if the user has enough balance
                 if (currentBalance >= amount) {
                     connection.setAutoCommit(false);
-
+    
+                    // Deduct the amount from the source account
                     String deductQuery = "UPDATE users SET user_bal = user_bal - ? WHERE user_accnum = ?";
                     PreparedStatement deductStmt = connection.prepareStatement(deductQuery);
                     deductStmt.setDouble(1, amount);
                     deductStmt.setString(2, sourceAccount);
                     deductStmt.executeUpdate();
-
+    
+                    // Credit the amount to the destination account
                     String creditQuery = "UPDATE users SET user_bal = user_bal + ? WHERE user_accnum = ?";
                     PreparedStatement creditStmt = connection.prepareStatement(creditQuery);
                     creditStmt.setDouble(1, amount);
                     creditStmt.setString(2, destinationAccount);
                     creditStmt.executeUpdate();
-
-                    String insertTransactionQuery = "INSERT INTO transactions (sender_id, receiver_id, amount,trans_type) VALUES (?,?,?, 'TRANSFER')";
+    
+                    // Insert the transaction record
+                    String insertTransactionQuery = "INSERT INTO transactions (sender_id, receiver_id, amount, trans_type) VALUES (?, ?, ?, 'TRANSFER')";
                     PreparedStatement transactionStmt = connection.prepareStatement(insertTransactionQuery);
                     transactionStmt.setString(1, sourceAccount);
                     transactionStmt.setString(2, destinationAccount);
                     transactionStmt.setDouble(3, amount);
                     transactionStmt.executeUpdate();
-
+    
                     connection.commit();
-                    System.out.println("\nTransfer successful!");
+                    System.out.println("\n\033[1;32mTransfer successful! Your balance has been updated.\033[0m");
                 } else {
-                    System.out.println("\nInsufficient funds!");
+                    System.out.println("\033[1;31mInsufficient funds! Please ensure you have enough balance to transfer.\033[0m");
                 }
             } else {
-                System.out.println("\nSource account does not exist OR Invalid Password!");
+                System.out.println("\033[1;31mSource account does not exist OR Invalid Password!\033[0m");
             }
-
+    
             connection.setAutoCommit(true);
+        } catch (SQLException e) {
+            System.out.println("\033[1;31mError during transfer: " + e.getMessage() + "\033[0m");
         } catch (Exception e) {
-            System.out.println("\nInvalid Entry. Please try again!");
+            System.out.println("\033[1;31mInvalid Entry. Please try again! " + e.getMessage() + "\033[0m");
         }
     }
-
+    
     // done
     private static void viewUserTransactionHistory(String accountNumber) {
         try {
-            // Prompt the admin to enter the user ID for transaction history
-
-            // SQL query to fetch transactions involving the specified user as sender or
-            // receiver
+            // SQL query to fetch transactions involving the specified user as sender or receiver
             String query = "SELECT transaction_id, sender_id, receiver_id, amount, transaction_date " +
                     "FROM transactions " +
                     "WHERE sender_id = ? OR receiver_id = ? " +
                     "ORDER BY transaction_date DESC";
-
+    
             PreparedStatement pstmt = connection.prepareStatement(query);
             pstmt.setString(1, accountNumber);
             pstmt.setString(2, accountNumber);
-
+    
             ResultSet rs = pstmt.executeQuery();
-
-            System.out.println("\n--- Transaction History ---");
+    
+            System.out.println("\n\033[1;36m--- Transaction History ---\033[0m");
             boolean hasTransactions = false;
-
-            // Iterate through the results and display each transaction
+    
+            // Check if there are any transactions
             while (rs.next()) {
                 hasTransactions = true;
                 int transactionId = rs.getInt("transaction_id");
-                int senderId = rs.getInt("sender_id");
-                int receiverId = rs.getInt("receiver_id");
+                String senderId = rs.getString("sender_id");
+                String receiverId = rs.getString("receiver_id");
                 double amount = rs.getDouble("amount");
                 Timestamp transactionDate = rs.getTimestamp("transaction_date");
-
-                // Display transaction details
-                System.out.printf("Transaction ID: %d | Sender ID: %d | Receiver ID: %d | Amount: %.2f | Date: %s%n",
+    
+                // Display transaction details in a readable format
+                System.out.printf("\n\033[1;32mTransaction ID:\033[0m %d | \033[1;34mSender ID:\033[0m %s | \033[1;34mReceiver ID:\033[0m %s " +
+                                "| \033[1;33mAmount:\033[0m $%.2f | \033[1;35mDate:\033[0m %s%n",
                         transactionId, senderId, receiverId, amount, transactionDate);
             }
-
+    
             if (!hasTransactions) {
-                System.out.println("No transactions found for User ID: " + accountNumber);
+                System.out.println("\033[1;31mNo transactions found for User ID: " + accountNumber + "\033[0m");
             }
-
+    
             // Close resources
             rs.close();
             pstmt.close();
         } catch (SQLException e) {
-            System.out.println("Error fetching transaction history: " + e.getMessage());
+            System.out.println("\033[1;31mError fetching transaction history: " + e.getMessage() + "\033[0m");
         }
     }
-
+    
     // done with exc
 
     private static void userLoanApply(String accountNumber, Scanner scanner) {
         try {
             while (true) {
-
-                System.err.println("\nSelect loan type from below:");
-                System.out.println("1. Personal with 10% interest rate");
-                System.out.println("2. Car with 12% interest rate");
-                System.out.println("3. Home with 15% interest rate");
-                // System.out.println("4. with 16% interest rate");
-                System.out.print("Enter your choice: ");
+                // Loan type selection with color
+                System.out.println("\n\033[1;36m--- Select Loan Type ---\033[0m");
+                System.out.println("\033[1;32m1.\033[0m Personal with 10% interest rate");
+                System.out.println("\033[1;32m2.\033[0m Car with 12% interest rate");
+                System.out.println("\033[1;32m3.\033[0m Home with 15% interest rate");
+                System.out.print("\n\033[1;33mEnter your choice: \033[0m");
                 String loanType = scanner.next();
                 int rate = 0;
+    
+                // Loan type validation
                 switch (loanType) {
                     case "1":
                         rate = 10;
                         break;
-
                     case "2":
                         rate = 12;
                         break;
-
                     case "3":
                         rate = 15;
                         break;
-
                     default:
-                        System.err.println("\nWrong Input!!! Select number from above catalog.");
+                        System.out.println("\n\033[1;31mInvalid input! Please select a valid loan type from the options above.\033[0m");
                         continue;
                 }
-
+    
+                // Loan amount input with validation
                 double loanAmount = 0;
                 while (true) {
-                    System.out.print("Enter loan amount: ");
+                    System.out.print("\n\033[1;33mEnter loan amount: \033[0m");
                     if (scanner.hasNextDouble()) {
-
                         loanAmount = scanner.nextDouble();
+                        if (loanAmount <= 0) {
+                            System.out.println("\033[1;31mPlease enter a positive loan amount.\033[0m");
+                            continue;
+                        }
                         break;
                     } else {
-                        System.out.println("Invalid Loan Amount");
-                        scanner.next();
-
+                        System.out.println("\033[1;31mInvalid Loan Amount! Please enter a valid number.\033[0m");
+                        scanner.next(); // Clear the invalid input
                     }
                 }
+    
+                // Loan duration input with validation
                 int loanDuration = 0;
                 while (true) {
-                    System.out.print("Enter loan duration (in months): ");
+                    System.out.print("\n\033[1;33mEnter loan duration (in months): \033[0m");
                     if (scanner.hasNextInt()) {
                         loanDuration = scanner.nextInt();
+                        if (loanDuration <= 0) {
+                            System.out.println("\033[1;31mLoan duration must be a positive number.\033[0m");
+                            continue;
+                        }
                         break;
                     } else {
-                        System.out.println("Invalid Loan Duration");
-                        scanner.next();
-
+                        System.out.println("\033[1;31mInvalid Loan Duration! Please enter a valid number.\033[0m");
+                        scanner.next(); // Clear the invalid input
                     }
                 }
-                // user id- 5548555
-                // pass - 123
-
-                scanner.nextLine(); // Consume newline
-
-                System.out.print("Enter loan description: ");
+    
+                // Consume leftover newline
+                scanner.nextLine();
+    
+                // Loan description input
+                System.out.print("\n\033[1;33mEnter loan description: \033[0m");
                 String loanDescription = scanner.nextLine();
-
-                // EMI calculation for simple interest
-                double emi = 0;
+    
+                // EMI Calculation for simple interest
                 double interest = (loanAmount * rate * loanDuration) / 1200;
-
-                emi = (loanAmount + interest) / loanDuration;
-
-                String query = "INSERT into loan(loandescription,loanamount,loanduration,loanemi,loanstatus,userid) values ('"
-                        + loanDescription + "'," + loanAmount + "," + loanDuration + "," + emi + ",'PENDING',"
-                        + accountNumber + ")";
-
+                double emi = (loanAmount + interest) / loanDuration;
+    
+                // Constructing query to insert loan application
+                String query = "INSERT INTO loan (loandescription, loanamount, loanduration, loanemi, loanstatus, userid) " +
+                        "VALUES (?, ?, ?, ?, 'PENDING', ?)";
+    
                 PreparedStatement pstmt = connection.prepareStatement(query);
-
-                ResultSet rs = pstmt.executeQuery();
-
-                System.err.println("Thank you for apply. We'll get back to you for any update.");
-                break;
-
+                pstmt.setString(1, loanDescription);
+                pstmt.setDouble(2, loanAmount);
+                pstmt.setInt(3, loanDuration);
+                pstmt.setDouble(4, emi);
+                pstmt.setString(5, accountNumber);
+    
+                // Executing the insert query
+                int rowsInserted = pstmt.executeUpdate();
+                if (rowsInserted > 0) {
+                    System.out.println("\n\033[1;32mThank you for applying! We'll get back to you for any updates.\033[0m");
+                } else {
+                    System.out.println("\n\033[1;31mSomething went wrong! Please try again.\033[0m");
+                }
+    
+                break; // Exit the loop after successful application
+    
             }
+        } catch (SQLException e) {
+            System.out.println("\n\033[1;31mDatabase error: " + e.getMessage() + "\033[0m");
+            System.out.println("\n\033[1;31mPlease try again later.\033[0m");
         } catch (Exception e) {
-            System.out.println(e.getMessage());
-            System.out.println("Something went wrong.");
-            // TODO: handle exception
+            System.out.println("\n\033[1;31mSomething went wrong: " + e.getMessage() + "\033[0m");
+            System.out.println("\n\033[1;31mPlease ensure you provide valid inputs.\033[0m");
         }
     }
-
+    
 }

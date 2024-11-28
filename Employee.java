@@ -9,80 +9,78 @@ import java.util.Scanner;
 // jo deposit withdraw mai username id ka field int dia tha wo v fix krna thoda
 public class Employee {
     private static Connection connection = null;
-
+    
     public Employee(Connection conn) {
         connection = conn;
     }
 
     public static void login(Scanner scanner) {
         try {
-            System.out.print("Enter Employee Id: ");
+            System.out.print("\u001B[36mEnter Employee Id: \u001B[0m");
             String accountNumber = scanner.next();
-            System.out.print("Enter Password: ");
+            System.out.print("\u001B[36mEnter Password: \u001B[0m");
             String pin = scanner.next();
-
+    
             String query = "SELECT * FROM admin_table WHERE admin_name = '" + accountNumber
                     + "' AND admin_password = '" + pin + "'";
             PreparedStatement pstmt = connection.prepareStatement(query);
             ResultSet rs = pstmt.executeQuery();
             boolean resBool = rs.next();
-
+    
             if (resBool) {
                 String customerName = rs.getString("admin_name");
-                System.out.println("Login Successful. Welcome, " + customerName);
+                System.out.println("\u001B[32mLogin Successful. Welcome, " + customerName + "!\u001B[0m");
                 showAccountMenu(accountNumber);
             } else {
-                System.out.println("Invalid Account Number or PIN");
+                System.out.println("\u001B[31mInvalid Account Number or PIN\u001B[0m");
             }
         } catch (SQLException e) {
-            System.out.println("Error: " + e.getMessage());
+            System.out.println("\u001B[31mError: " + e.getMessage() + "\u001B[0m");
         }
     }
-
-    private static void printHeader(String title) {
-        System.out.println("\033[1;36m=========================================");
-        System.out.println("           " + title);
-        System.out.println("=========================================\033[0m");
-    }
-
+    
     private static void showAccountMenu(String accountNumber) {
         Scanner scanner = new Scanner(System.in);
         boolean logout = false;
-
+    
         while (!logout) {
-            System.out.println("\n--- Employee Account Menu ---");
-            System.out.println("1. Register User");
-            System.out.println("2. Check User Data");
-            System.out.println("3. Verify Loan");
-            System.out.println("4. Deposit Money");
-            System.out.println("5. Withdraw Money");
-            System.out.println("6. Transfer Funds");
-            System.out.println("7. Transaction History");
-            System.out.println("8. Clear Pending Tickets");
-            System.out.println("9. View Payslip");
-            System.out.println("10. Logout");
-            System.out.print("Enter your choice: ");
-
+            System.out.println("\n\u001B[44m========================================\u001B[0m");
+            System.out.println("\u001B[1m\u001B[36m|       Employee Account Menu         |\u001B[0m");
+            System.out.println("\u001B[44m========================================\u001B[0m");
+            System.out.println("| \u001B[32m1. Register User                   \u001B[0m|");
+            System.out.println("| \u001B[32m2. Check User Data                 \u001B[0m|");
+            System.out.println("| \u001B[32m3. Verify Loan                     \u001B[0m|");
+            System.out.println("| \u001B[32m4. Deposit Money                   \u001B[0m|");
+            System.out.println("| \u001B[32m5. Withdraw Money                  \u001B[0m|");
+            System.out.println("| \u001B[32m6. Transfer Funds                  \u001B[0m|");
+            System.out.println("| \u001B[32m7. Transaction History             \u001B[0m|");
+            System.out.println("| \u001B[32m8. Clear Pending Tickets           \u001B[0m|");
+            System.out.println("| \u001B[33m9. View Payslip                    \u001B[0m|");
+            System.out.println("| \u001B[33m10. Logout                         \u001B[0m|");
+            System.out.println("========================================");
+    
+            System.out.print("\u001B[36m\nEnter your choice: \u001B[0m");
             String choice = scanner.next();
-
+    
             switch (choice) {
                 case "1" -> registerUser(scanner);
                 case "2" -> checkUserData(accountNumber, scanner);
                 case "3" -> loanApproval(scanner);
-                // case "4" -> updateKyc(accountNumber, scanner);
                 case "4" -> deposit(scanner);
                 case "5" -> withdraw(scanner);
                 case "6" -> transferFunds(scanner);
                 case "7" -> viewTransactionHistory(scanner);
                 case "8" -> clearPendingTickets(scanner);
                 case "9" -> viewPayslip(scanner);
-                case "10" -> logout = true;
-                default -> System.out.println("Invalid option. Try again.");
+                case "10" -> {
+                    logout = true;
+                    System.out.println("\u001B[32m\nLogging out. Goodbye!\u001B[0m");
+                }
+                default -> System.out.println("\u001B[31mInvalid option. Try again.\u001B[0m");
             }
-
         }
     }
-
+        
     private static void viewPayslip(Scanner scanner) {
         // Scanner scanner = new Scanner(System.in);
 
